@@ -1,0 +1,30 @@
+# Binaries
+sec-cli
+sec-cli.exe
+*.exe
+*.out
+
+# Build artifacts
+/dist/
+/bin/
+
+# SQLite cache
+*.db
+*.sqlite
+
+# Go module cache
+vendor/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage.out
+coverage.html
