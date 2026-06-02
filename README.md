@@ -1,98 +1,131 @@
 # sec-cli
 
-> Fast CLI for SEC filings, built for LLM workflows.
+Extract structured data from SEC EDGAR filings for LLM consumption.
 
-<!-- Hero asset goes here Week 3: asciinema of `sec-cli get AAPL | jq '.sections["Risk Factors"]'` -->
-
-[Design doc](DESIGN.md) · [Blog post](https://kritidutta.dev/sec-cli) · [Tweet thread](https://x.com/kritidutta01)
+> **Status: early development — Phase 2 of 14.** The foundation (EDGAR access +
+> filing discovery) works and is tested against the live SEC API. The headline
+> features — parsing filings into clean tables and text, JSON/Markdown output,
+> and year-over-year diffs — are not built yet. See the [Roadmap](#roadmap).
 
 ---
 
-## What this is
+## What it does today
 
-sec-cli fetches, parses, and diffs SEC EDGAR filings from the command line. It outputs clean JSON or Markdown — pipe directly into any LLM. No API key. No account. No rate-limit headaches beyond EDGAR's public limits.
+Right now sec-cli is the "find and fetch" layer: it reliably locates the right
+filing for any US public company without getting rate-limited or blocked.
 
-It exists because EDGAR's HTML is from 2003 and every existing tool either loses table structure entirely or costs money for someone else's parsing logic. The target consumer of sec-cli's output is a language model, not a human reading a terminal.
+- **EDGAR-compliant HTTP client** — sends the SEC-required `User-Agent` and
+  self-throttles below EDGAR's 10 req/sec cap, with a one-shot retry on 5xx.
+- **Ticker → CIK lookup** — `AAPL` resolves to Apple's SEC ID; the lookup table
+  is fetched once and cached for the process lifetime.
+- **Filing discovery** — list a company's filings, filter by form type
+  (`10-K`, `10-Q`, `8-K`), sorted newest-first; resolve the latest filing or the
+  one filed in a given year.
+- **One command so far:** `sec-cli latest <ticker>` prints the accession number
+  of the most recent filing of a form type.
 
-## Quickstart
+What it **cannot** do yet: open a filing and read its contents. Today it returns
+a filing's *identifier* (accession number), not the financial tables, risk
+factors, or any extracted data. That work begins at Phase 4.
+
+---
+
+## Requirements
+
+- **Go 1.22+**
+- A `SEC_CLI_USER_AGENT` environment variable. SEC's Fair Access policy requires
+  every request to identify the caller with a real contact; without it EDGAR
+  returns HTTP 403, so sec-cli refuses to run until it is set.
 
 ```bash
-go install github.com/kritidutta01/sec-cli@latest
-
-# Fetch Apple's latest 10-K as Markdown
-sec-cli get AAPL --output md
-
-# Extract just the Risk Factors section as JSON
-sec-cli get AAPL --section "Risk Factors" --output json
-
-# Diff two years of MD&A
-sec-cli diff AAPL --from 2022 --to 2024 --section "MD&A"
+# macOS / Linux
+export SEC_CLI_USER_AGENT="Your Name your-email@example.com"
+```
+```powershell
+# Windows PowerShell (current session)
+$env:SEC_CLI_USER_AGENT = "Your Name your-email@example.com"
+# …or persist it for all future terminals:
+[Environment]::SetEnvironmentVariable("SEC_CLI_USER_AGENT", "Your Name your-email@example.com", "User")
 ```
 
-Or with Python:
+---
 
-```python
-pip install sec-cli
+## Build & run
 
-from sec_cli import get_filing, diff_filings
-filing = get_filing("AAPL", form="10-K", output="json")
+From the repository root:
+
+```bash
+# build the binary into ./bin
+go build -o bin/sec-cli ./cmd/sec-cli        # bin/sec-cli.exe on Windows
+
+# or run straight from source
+go run ./cmd/sec-cli latest AAPL
 ```
 
-## Status
+### Usage
 
-**Week 1 of 13 — early development.**
+```text
+$ sec-cli latest AAPL              # latest annual report (10-K)
+0000320193-25-000079
 
-- [x] EDGAR HTTP client (ticker → CIK → filing → HTML)
-- [ ] Section parser
-- [ ] Table extractor (the hard part — see [DESIGN.md](DESIGN.md))
-- [ ] JSON / Markdown output
-- [ ] `sec-cli diff`
-- [ ] SQLite cache
-- [ ] Held-out table accuracy report (target: >90%)
+$ sec-cli latest AAPL -t 10-Q      # latest quarterly report
+0000320193-26-000013
 
-## Why this exists
+$ sec-cli latest MSFT              # works for any US public company
+0000950170-25-100235
 
-The eval/observability layer for finance AI is underbuilt. When you try to feed a 10-K into a language model today, you get one of:
+$ sec-cli latest NOPE              # unknown ticker → clear error, exit 1
+sec-cli: edgar: unknown ticker "NOPE"
 
-1. Raw HTML tag soup (unusable)
-2. Extracted text with no table structure (loses all the numbers)
-3. Paid API output you can't inspect or run locally
-
-sec-cli is the missing piece: a fast, local, auditable parser that produces LLM-ready output with financial tables intact. The table parser is the technical moat — see [DESIGN.md § The Table Parser](DESIGN.md#the-table-parser-the-hard-part) for the approach.
-
-## How it works
-
-```
-ticker → EDGAR CIK lookup → submissions API → filing HTML → section split → table extraction → JSON/MD
+$ sec-cli version
+0.0.0-dev
 ```
 
-Full architecture in [DESIGN.md](DESIGN.md).
+Flags: `-t, --type` selects the form type (default `10-K`). Run
+`sec-cli <command> --help` for details.
 
-## What's in v1.0 (and what's not)
+---
 
-**In scope:**
-- `sec-cli get` with section extraction and JSON/Markdown output
-- `sec-cli diff` for text and table diffs between periods
-- Table parser validated against a 30-table held-out test set
-- SQLite cache (no re-fetching already-seen filings)
-- `go install` + `brew tap` + `pip install sec-cli`
+## Tests
 
-**Deliberately out of scope (v1.0):**
-- XBRL/iXBRL parsing
-- Bulk screening across companies
-- Windows-native binary (macOS + Linux; Windows via WSL)
+The test suite is hermetic — it uses recorded fixtures and never touches the
+live SEC API, so no network or `SEC_CLI_USER_AGENT` is needed:
+
+```bash
+go test ./...                          # all packages
+go test ./internal/edgar/ -v -cover    # verbose, with coverage (~85%)
+```
+
+Notes for contributors on Windows: the suite uses a fake `http.RoundTripper`
+rather than `httptest.Server`, which hangs on some Windows/Go builds due to a
+`cancelIO` defect in the standard library's listener teardown. `go test -race`
+requires a C toolchain (cgo) and runs in CI.
+
+---
 
 ## Roadmap
 
-- **v1.1** — 8-K event classification, streaming output for large filings
-- **v1.2** — Python-native rewrite of table parser for Jupyter integration
-- **v1.3** — Embeddings index over a company's full filing history
+sec-cli v1.0 targets **iXBRL-era filings** (modern 10-K/10-Q/8-K). Pre-iXBRL
+filings are detected and refused cleanly rather than parsed badly. The
+phase-by-phase build progresses through the table below.
 
-## Topics
-
-`sec-edgar` `cli` `finance` `llm-tools` `go` `financial-data` `10-k` `edgar`
+| Phase | Scope | Status |
+|------:|-------|--------|
+| 0 | Scaffold (module, CI, Makefile) | ✅ Done |
+| 1 | EDGAR HTTP client (User-Agent, rate limit) | ✅ Done |
+| 2 | Submissions metadata & CIK lookup | ✅ Done |
+| 3 | Primary-document fetch | ⏳ Next |
+| 4 | Format router (iXBRL / HTML / text detection) | Planned |
+| 5–8 | iXBRL parser: facts, tables, sections, free text | Planned |
+| 9 | Normalized model + JSON / Markdown / text output | Planned |
+| 10 | SQLite cache | Planned |
+| 11 | `get` command (fetch → parse → render) | Planned |
+| 12 | `diff` command (year-over-year change) | Planned |
+| 13 | Accuracy harness + baselines | Planned |
+| 14 | Python wrapper & distribution | Planned |
 
 ---
 
-Built by [Kriti Dutta](https://kritidutta.dev) — engineer at BlackRock, building open infrastructure for financial AI.  
-[Twitter](https://x.com/kritidutta01) · [LinkedIn](https://linkedin.com/in/kritidutta) · [Email](mailto:kriti@kritidutta.dev)
+## License
+
+TBD.

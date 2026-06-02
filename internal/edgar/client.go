@@ -1,119 +1,123 @@
+// Package edgar is the HTTP client layer for SEC EDGAR. It enforces the two
+// rules EDGAR rejects requests over: a present User-Agent header and the
+// 10 req/sec rate cap.
 package edgar
 
 import (
-	"encoding/json"
+	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
+	"os"
+	"sync"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 const (
-	secBase  = "https://www.sec.gov"
-	dataBase = "https://data.sec.gov"
+	userAgentEnv  = "SEC_CLI_USER_AGENT"
+	fairAccessURL = "https://www.sec.gov/os/accessing-edgar-data"
 
-	// EDGAR requires "Company Name contact@email.com" format — bare tool names get 403.
-	// See: https://www.sec.gov/os/accessing-edgar-data
-	userAgent = "sec-cli data.kriti.dutta@gmail.com"
+	// rateLimitPerSec is one below EDGAR's 10 req/sec cap to absorb clock skew
+	// between the local limiter and EDGAR's edge.
+	rateLimitPerSec = 9
+	rateBurst       = 1
+
+	defaultHTTPTimeout = 30 * time.Second
+	retryDelay         = 500 * time.Millisecond
 )
 
-// Client talks to EDGAR's public APIs.
+// StatusError is returned by Get for any non-2xx HTTP response. Callers can
+// use errors.As to inspect the status code.
+type StatusError struct {
+	Status int
+	URL    string
+}
+
+func (e *StatusError) Error() string {
+	return fmt.Sprintf("edgar: HTTP %d for %s", e.Status, e.URL)
+}
+
+// Client issues rate-limited, User-Agent-identified requests to SEC EDGAR.
+// One Client owns one rate limiter; share a single Client across goroutines
+// to keep concurrent fetches under the global rate cap.
 type Client struct {
-	http *http.Client
+	http      *http.Client
+	limiter   *rate.Limiter
+	userAgent string
+
+	// tickerMu guards the lazily-loaded ticker→CIK map. The map is fetched once
+	// per process on first LookupCIK and reused for the Client's lifetime.
+	tickerMu  sync.Mutex
+	tickerCIK map[string]int64
 }
 
-func NewClient() *Client {
-	return &Client{
-		http: &http.Client{Timeout: 30 * time.Second},
+// NewClient reads SEC_CLI_USER_AGENT from the environment and returns a Client.
+// EDGAR's Fair Access policy requires every request identify the caller; a
+// missing or empty env var returns an error here instead of letting EDGAR
+// answer 403 on the wire.
+func NewClient() (*Client, error) {
+	ua := os.Getenv(userAgentEnv)
+	if ua == "" {
+		return nil, fmt.Errorf(
+			"%s environment variable is not set; SEC EDGAR Fair Access policy requires a contact identifier — see %s",
+			userAgentEnv, fairAccessURL,
+		)
 	}
+	return &Client{
+		http:      &http.Client{Timeout: defaultHTTPTimeout},
+		limiter:   rate.NewLimiter(rate.Limit(rateLimitPerSec), rateBurst),
+		userAgent: ua,
+	}, nil
 }
 
-func (c *Client) get(url string) ([]byte, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
+// Get fetches url and returns the response body. It blocks on the shared rate
+// limiter, sets the User-Agent header, retries once on 5xx with a 500ms delay,
+// and returns *StatusError for any non-2xx response.
+func (c *Client) Get(ctx context.Context, url string) ([]byte, error) {
+	body, err := c.do(ctx, url)
+	if err == nil {
+		return body, nil
+	}
+	var se *StatusError
+	if !errors.As(err, &se) || se.Status < 500 || se.Status > 599 {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", userAgent)
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case <-time.After(retryDelay):
+	}
+	return c.do(ctx, url)
+}
+
+func (c *Client) do(ctx context.Context, url string) ([]byte, error) {
+	if err := c.limiter.Wait(ctx); err != nil {
+		return nil, fmt.Errorf("edgar: rate limit wait: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("edgar: build request: %w", err)
+	}
+	req.Header.Set("User-Agent", c.userAgent)
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("edgar: GET %s: %w", url, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("EDGAR %d: %s", resp.StatusCode, url)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		return nil, &StatusError{Status: resp.StatusCode, URL: url}
 	}
-	return io.ReadAll(resp.Body)
-}
 
-// LookupCIK resolves a ticker symbol to its EDGAR CIK.
-// Uses the full company_tickers.json map (~4 MB, cached by EDGAR CDN).
-func (c *Client) LookupCIK(ticker string) (int64, error) {
-	data, err := c.get(secBase + "/files/company_tickers.json")
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return 0, fmt.Errorf("fetching ticker map: %w", err)
+		return nil, fmt.Errorf("edgar: read body from %s: %w", url, err)
 	}
-
-	var tickers map[string]Company
-	if err := json.Unmarshal(data, &tickers); err != nil {
-		return 0, fmt.Errorf("parsing ticker map: %w", err)
-	}
-
-	upper := strings.ToUpper(ticker)
-	for _, co := range tickers {
-		if strings.ToUpper(co.Ticker) == upper {
-			return co.CIK, nil
-		}
-	}
-	return 0, fmt.Errorf("ticker %q not found in EDGAR", ticker)
-}
-
-// GetSubmissions returns filing metadata for a company.
-// cik must be the raw integer CIK (no padding needed here).
-func (c *Client) GetSubmissions(cik int64) (*Submissions, error) {
-	// Submissions endpoint uses zero-padded 10-digit CIK.
-	url := fmt.Sprintf("%s/submissions/CIK%010d.json", dataBase, cik)
-	data, err := c.get(url)
-	if err != nil {
-		return nil, fmt.Errorf("fetching submissions for CIK %d: %w", cik, err)
-	}
-
-	var subs Submissions
-	if err := json.Unmarshal(data, &subs); err != nil {
-		return nil, fmt.Errorf("parsing submissions: %w", err)
-	}
-	return &subs, nil
-}
-
-// LatestFiling returns the most recent filing of the given form type.
-func (c *Client) LatestFiling(cik int64, formType string) (*Filing, error) {
-	subs, err := c.GetSubmissions(cik)
-	if err != nil {
-		return nil, err
-	}
-
-	r := subs.Filings.Recent
-	for i, form := range r.Form {
-		if form == formType {
-			return &Filing{
-				AccessionNumber: r.AccessionNumber[i],
-				FilingDate:      r.FilingDate[i],
-				Form:            form,
-				PrimaryDocument: r.PrimaryDocument[i],
-			}, nil
-		}
-	}
-	return nil, fmt.Errorf("no %s filing found for CIK %d", formType, cik)
-}
-
-// FetchFilingHTML downloads the primary HTML document for a filing.
-// Archives URLs use the raw (unpadded) CIK integer.
-func (c *Client) FetchFilingHTML(cik int64, filing *Filing) ([]byte, error) {
-	// Accession number "0000320193-24-000123" → "000032019324000123" in archive paths.
-	accNo := strings.ReplaceAll(filing.AccessionNumber, "-", "")
-	url := fmt.Sprintf("%s/Archives/edgar/data/%d/%s/%s",
-		secBase, cik, accNo, filing.PrimaryDocument)
-	return c.get(url)
+	return body, nil
 }

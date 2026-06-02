@@ -1,12 +1,18 @@
-# Binaries
-sec-cli
-sec-cli.exe
+# Binaries (anchored to repo root so they don't match the cmd/sec-cli/ package)
+/sec-cli
+/sec-cli.exe
 *.exe
 *.out
 
 # Build artifacts
 /dist/
 /bin/
+
+# Local scratch filings and AI-implementation prompts (not part of the codebase)
+/data/
+/CLAUDE_PROMPT.md
+/DESIGN.md
+/IMPLEMENTATION.md
 
 # SQLite cache
 *.db
