@@ -1,0 +1,10 @@
+{
+  "description": "Held-out router classification corpus. Each entry is classified standalone (no index resolution). The full 50-filing corpus from DESIGN.md is populated over time; the harness enforces 100% accuracy on whatever is listed here.",
+  "cases": [
+    {"file": "ixbrl.htm", "expected": "IXBRL"},
+    {"file": "partial.htm", "expected": "PartialIXBRL"},
+    {"file": "plainhtml.htm", "expected": "PlainHTML"},
+    {"file": "plaintext.txt", "expected": "PlainText"},
+    {"file": "unknown.bin", "expected": "Unknown"}
+  ]
+}

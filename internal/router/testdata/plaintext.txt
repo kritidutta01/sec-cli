@@ -1,0 +1,29 @@
+<SEC-DOCUMENT>0000912057-08-012345.txt : 20080215
+<SEC-HEADER>0000912057-08-012345.hdr.sgml : 20080215
+ACCESSION NUMBER:		0000912057-08-012345
+CONFORMED SUBMISSION TYPE:	10-K
+</SEC-HEADER>
+<DOCUMENT>
+<TYPE>10-K
+<SEQUENCE>1
+<TEXT>
+
+                          UNITED STATES
+               SECURITIES AND EXCHANGE COMMISSION
+                     Washington, D.C. 20549
+==================================================================
+
+                            FORM 10-K
+
+       ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF
+            THE SECURITIES EXCHANGE ACT OF 1934
+
+------------------------------------------------------------------
+
+ITEM 1.  BUSINESS
+
+The Company designs, manufactures and markets a range of products.
+
+</TEXT>
+</DOCUMENT>
+</SEC-DOCUMENT>
