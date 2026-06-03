@@ -2,17 +2,18 @@
 
 Extract structured data from SEC EDGAR filings for LLM consumption.
 
-> **Status: early development — Phase 2 of 14.** The foundation (EDGAR access +
-> filing discovery) works and is tested against the live SEC API. The headline
-> features — parsing filings into clean tables and text, JSON/Markdown output,
-> and year-over-year diffs — are not built yet. See the [Roadmap](#roadmap).
+> **Status: early development — Phase 5 of 14.** EDGAR access, filing discovery,
+> format detection, and the inline-XBRL **fact stream** all work and are tested
+> against real filings. Still ahead: projecting facts into clean tables, section
+> and free-text extraction, JSON/Markdown output, and year-over-year diffs. See
+> the [Roadmap](#roadmap).
 
 ---
 
 ## What it does today
 
-Right now sec-cli is the "find and fetch" layer: it reliably locates the right
-filing for any US public company without getting rate-limited or blocked.
+sec-cli can now find a filing, fetch it, classify its format, and pull out the
+raw inline-XBRL fact stream — the numeric backbone of every modern filing.
 
 - **EDGAR-compliant HTTP client** — sends the SEC-required `User-Agent` and
   self-throttles below EDGAR's 10 req/sec cap, with a one-shot retry on 5xx.
@@ -21,12 +22,21 @@ filing for any US public company without getting rate-limited or blocked.
 - **Filing discovery** — list a company's filings, filter by form type
   (`10-K`, `10-Q`, `8-K`), sorted newest-first; resolve the latest filing or the
   one filed in a given year.
-- **One command so far:** `sec-cli latest <ticker>` prints the accession number
-  of the most recent filing of a form type.
+- **Primary-document fetch** — pull the raw bytes of a filing's main document.
+- **Format router** — classify a filing as `IXBRL`, `PartialIXBRL`, `PlainHTML`,
+  `PlainText`, or `Unknown`, resolving filing-index pages to the real document.
+  v1.0 parses the iXBRL family and refuses the rest cleanly.
+- **iXBRL fact stream** — parse `xbrli:context` periods/segments and extract
+  every `ix:nonFraction` / `ix:nonNumeric` fact, with scale, sign, and
+  dash-as-zero handled. Verified against Apple's reported FY2024 figures.
 
-What it **cannot** do yet: open a filing and read its contents. Today it returns
-a filing's *identifier* (accession number), not the financial tables, risk
-factors, or any extracted data. That work begins at Phase 4.
+Commands: `latest`, `fetch`, `detect`, `facts` (plus `version`).
+
+What it **cannot** do yet: turn the fact stream into labeled financial tables
+(rows × periods), extract sections and free text, or emit JSON/Markdown. The
+`facts` command is a flat debugging dump — the same concept appears once per
+context with no labels. Projecting those facts into readable statements is
+Phase 6; structured output is Phase 9.
 
 ---
 
@@ -65,24 +75,29 @@ go run ./cmd/sec-cli latest AAPL
 ### Usage
 
 ```text
-$ sec-cli latest AAPL              # latest annual report (10-K)
+$ sec-cli latest AAPL                       # accession of latest 10-K
 0000320193-25-000079
 
-$ sec-cli latest AAPL -t 10-Q      # latest quarterly report
-0000320193-26-000013
+$ sec-cli detect AAPL --year 2024           # classify the filing's format
+IXBRL
 
-$ sec-cli latest MSFT              # works for any US public company
-0000950170-25-100235
+$ sec-cli detect AAPL --year 2018           # pre-iXBRL filings are detected…
+PlainHTML
 
-$ sec-cli latest NOPE              # unknown ticker → clear error, exit 1
+$ sec-cli fetch AAPL --year 2024            # first 200 bytes of the document
+<?xml version='1.0' encoding='ASCII'?>...
+
+$ sec-cli facts AAPL --year 2024 --concept RevenueFromContract
+us-gaap:RevenueFromContract...  2023-10-01..2024-09-28  391035000000  usd
+...
+
+$ sec-cli latest NOPE                       # unknown ticker → clear error, exit 1
 sec-cli: edgar: unknown ticker "NOPE"
-
-$ sec-cli version
-0.0.0-dev
 ```
 
-Flags: `-t, --type` selects the form type (default `10-K`). Run
-`sec-cli <command> --help` for details.
+Common flags: `-t, --type` selects the form type (default `10-K`); `--year`
+targets a filing year (default: latest); `--concept` filters `facts` to concepts
+containing a string. Run `sec-cli <command> --help` for details.
 
 ---
 
@@ -114,9 +129,11 @@ phase-by-phase build progresses through the table below.
 | 0 | Scaffold (module, CI, Makefile) | ✅ Done |
 | 1 | EDGAR HTTP client (User-Agent, rate limit) | ✅ Done |
 | 2 | Submissions metadata & CIK lookup | ✅ Done |
-| 3 | Primary-document fetch | ⏳ Next |
-| 4 | Format router (iXBRL / HTML / text detection) | Planned |
-| 5–8 | iXBRL parser: facts, tables, sections, free text | Planned |
+| 3 | Primary-document fetch | ✅ Done |
+| 4 | Format router (iXBRL / HTML / text detection) | ✅ Done |
+| 5 | iXBRL parser: fact stream & contexts | ✅ Done |
+| 6 | Presentation linkbase & table projection | ⏳ Next |
+| 7–8 | iXBRL parser: layout tables, sections, free text | Planned |
 | 9 | Normalized model + JSON / Markdown / text output | Planned |
 | 10 | SQLite cache | Planned |
 | 11 | `get` command (fetch → parse → render) | Planned |
