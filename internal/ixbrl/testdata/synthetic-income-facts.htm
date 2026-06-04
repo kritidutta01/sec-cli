@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Synthetic iXBRL facts paired with synthetic-income_pre.xml / _lab.xml.
+     Two full-year duration contexts (2024 newest, 2023). ResearchExpense has a
+     2024 fact but no 2023 fact, so its 2023 cell must project to null, not zero,
+     and drag confidence below "high". -->
+<html xmlns:ix="http://www.xbrl.org/2013/inlineXBRL" xmlns:xbrli="http://www.xbrl.org/2003/instance">
+<body>
+<ix:header><ix:resources>
+  <xbrli:context id="dur-2024">
+    <xbrli:entity><xbrli:identifier scheme="http://www.sec.gov/CIK">0001234567</xbrli:identifier></xbrli:entity>
+    <xbrli:period><xbrli:startDate>2024-01-01</xbrli:startDate><xbrli:endDate>2024-12-31</xbrli:endDate></xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="dur-2023">
+    <xbrli:entity><xbrli:identifier scheme="http://www.sec.gov/CIK">0001234567</xbrli:identifier></xbrli:entity>
+    <xbrli:period><xbrli:startDate>2023-01-01</xbrli:startDate><xbrli:endDate>2023-12-31</xbrli:endDate></xbrli:period>
+  </xbrli:context>
+</ix:resources></ix:header>
+<table>
+<tr><td>Revenue</td>
+  <td><ix:nonFraction name="acme:Revenues" contextRef="dur-2024" unitRef="usd" scale="6" id="r24">1,000</ix:nonFraction></td>
+  <td><ix:nonFraction name="acme:Revenues" contextRef="dur-2023" unitRef="usd" scale="6" id="r23">900</ix:nonFraction></td></tr>
+<tr><td>Cost of sales</td>
+  <td><ix:nonFraction name="acme:CostOfSales" contextRef="dur-2024" unitRef="usd" scale="6" id="c24">600</ix:nonFraction></td>
+  <td><ix:nonFraction name="acme:CostOfSales" contextRef="dur-2023" unitRef="usd" scale="6" id="c23">550</ix:nonFraction></td></tr>
+<tr><td>Gross profit</td>
+  <td><ix:nonFraction name="acme:GrossProfit" contextRef="dur-2024" unitRef="usd" scale="6" id="g24">400</ix:nonFraction></td>
+  <td><ix:nonFraction name="acme:GrossProfit" contextRef="dur-2023" unitRef="usd" scale="6" id="g23">350</ix:nonFraction></td></tr>
+<tr><td>Costs and expenses</td>
+  <td><ix:nonFraction name="acme:CostsAndExpenses" contextRef="dur-2024" unitRef="usd" scale="6" id="ce24">130</ix:nonFraction></td>
+  <td><ix:nonFraction name="acme:CostsAndExpenses" contextRef="dur-2023" unitRef="usd" scale="6" id="ce23">120</ix:nonFraction></td></tr>
+<tr><td>Research and development</td>
+  <td><ix:nonFraction name="acme:ResearchExpense" contextRef="dur-2024" unitRef="usd" scale="6" id="rd24">50</ix:nonFraction></td></tr>
+<tr><td>Total operating expenses</td>
+  <td><ix:nonFraction name="acme:OperatingExpenses" contextRef="dur-2024" unitRef="usd" scale="6" id="oe24">80</ix:nonFraction></td>
+  <td><ix:nonFraction name="acme:OperatingExpenses" contextRef="dur-2023" unitRef="usd" scale="6" id="oe23">70</ix:nonFraction></td></tr>
+<tr><td>Net income</td>
+  <td><ix:nonFraction name="acme:NetIncome" contextRef="dur-2024" unitRef="usd" scale="6" id="ni24">320</ix:nonFraction></td>
+  <td><ix:nonFraction name="acme:NetIncome" contextRef="dur-2023" unitRef="usd" scale="6" id="ni23">280</ix:nonFraction></td></tr>
+</table>
+</body>
+</html>
