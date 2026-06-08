@@ -34,6 +34,41 @@ func RendererFor(format string) (Renderer, error) {
 	}
 }
 
+// LexicalRenderer writes a lexical diff report — per-section word-level diffs
+// — as plain Markdown. It is used when --layer lexical is requested and wraps
+// both the structural ChangeSet header and the word-level paragraph diffs.
+type LexicalRenderer struct{}
+
+// Render writes the lexical diff as Markdown.
+func (LexicalRenderer) Render(cs *ChangeSet, lexical []LexicalSectionDiff, w io.Writer) error {
+	var b strings.Builder
+	fmt.Fprintf(&b, "# Lexical diff — %s\n\n", diffHeading(cs))
+	if len(cs.Statements) > 0 {
+		b.WriteString("## Financial Statements\n\n")
+		for _, s := range cs.Statements {
+			writeStatementMarkdown(&b, s)
+		}
+	}
+	if len(lexical) == 0 {
+		b.WriteString("_No modified sections with paired paragraphs._\n")
+	}
+	for _, ls := range lexical {
+		heading := ls.Title
+		if ls.Item != "" {
+			heading = "Item " + ls.Item
+			if ls.Title != "" {
+				heading += " — " + ls.Title
+			}
+		}
+		fmt.Fprintf(&b, "## %s\n\n", heading)
+		for i, p := range ls.Paragraphs {
+			fmt.Fprintf(&b, "**Paragraph %d**\n\n%s\n\n", i+1, p.Text)
+		}
+	}
+	_, err := io.WriteString(w, b.String())
+	return err
+}
+
 // JSON renders the canonical, schema-stable serialization of a change set:
 // deterministic field order, HTML left unescaped so paragraph text stays
 // readable, and a trailing newline.

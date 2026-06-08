@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import List, Optional
 
 from . import _runner
+from .errors import SecCliError
 from .models import ChangeSet, Document
 
 
@@ -60,3 +61,20 @@ def diff(
     if no_cache:
         args.append("--no-cache")
     return ChangeSet.from_json(_runner.run(args))
+
+
+def search(
+    query: str,
+    *,
+    form: str = "10-K",
+    limit: int = 10,
+) -> None:
+    """Search EDGAR filings by full-text query.
+
+    .. note::
+        ``search`` is not yet implemented in sec-cli v1.0. It is planned for
+        v1.1. Calling this function always raises :class:`~seccli.errors.SecCliError`.
+    """
+    raise SecCliError(
+        "sec-cli search is not yet implemented (planned for v1.1).",
+    )

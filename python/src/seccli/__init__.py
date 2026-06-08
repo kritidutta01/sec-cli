@@ -13,7 +13,7 @@ Python views never diverge.
 
 from __future__ import annotations
 
-from .client import diff, get
+from .client import diff, get, search
 from .errors import SecCliError, SecCliNotFoundError
 from .models import (
     CellDelta,
@@ -38,6 +38,7 @@ __version__ = "0.1.0"
 __all__ = [
     "get",
     "diff",
+    "search",
     "SecCliError",
     "SecCliNotFoundError",
     "Document",

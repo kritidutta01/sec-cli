@@ -1,7 +1,7 @@
 BINARY := bin/sec-cli
 PKG    := ./...
 
-.PHONY: build test lint fmt clean
+.PHONY: build test lint fmt clean accuracy
 
 build:
 	go build -o $(BINARY) ./cmd/sec-cli
@@ -17,3 +17,6 @@ fmt:
 
 clean:
 	rm -rf bin/
+
+accuracy: build
+	$(BINARY) accuracy --corpus internal/accuracy/testdata/corpus

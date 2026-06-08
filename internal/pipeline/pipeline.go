@@ -37,7 +37,11 @@ type Options struct {
 	// Form is the filing form type; empty defaults to "10-K".
 	Form string
 	// Year selects the filing filed in that calendar year; 0 means latest.
+	// Ignored when Accession is set.
 	Year int
+	// Accession pins to a specific filing accession number (handles amendments).
+	// When set, Year is ignored and the filing is resolved by accession instead.
+	Accession string
 	// Statements is the set of statement keys to project (income, balance,
 	// cashflow, equity, comprehensive); empty means the default set.
 	Statements []string
@@ -73,9 +77,12 @@ func Run(ctx context.Context, opts Options) (*model.Document, error) {
 	}
 
 	var filing edgar.Filing
-	if opts.Year != 0 {
+	switch {
+	case opts.Accession != "":
+		filing, err = client.FilingByAccession(ctx, cik, opts.Accession)
+	case opts.Year != 0:
 		filing, err = client.FilingForYear(ctx, cik, form, opts.Year)
-	} else {
+	default:
 		filing, err = client.LatestFiling(ctx, cik, form)
 	}
 	if err != nil {

@@ -1,3 +1,5 @@
+<!-- sec-cli v0.1.0 schema 1.0.0 -->
+
 # (ACME) 10-K — period ending 2024-12-31
 
 ## Item 1 — Business

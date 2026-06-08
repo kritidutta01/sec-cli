@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -21,6 +22,7 @@ func diffCmd() *cobra.Command {
 		from   int
 		to     int
 		format string
+		layer  string
 	)
 	cmd := &cobra.Command{
 		Use:   "diff <ticker>",
@@ -30,10 +32,17 @@ func diffCmd() *cobra.Command {
 			if from == 0 || to == 0 {
 				return fmt.Errorf("both --from and --to are required (filing years)")
 			}
-			renderer, err := diff.RendererFor(format)
-			if err != nil {
-				return err
+
+			diffLayer := diff.Layer(layer)
+			// Semantic is stubbed: return the clear error with exit code 64 (EX_USAGE).
+			if diffLayer == diff.LayerSemantic {
+				fmt.Fprintln(os.Stderr, diff.ErrSemanticNotImplemented.Error())
+				os.Exit(64)
 			}
+			if diffLayer != diff.LayerStructural && diffLayer != diff.LayerLexical {
+				return fmt.Errorf("unknown --layer %q (choose structural, lexical, semantic)", layer)
+			}
+
 			c, err := openCache(cmd)
 			if err != nil {
 				return err
@@ -50,7 +59,20 @@ func diffCmd() *cobra.Command {
 				return fmt.Errorf("to %d: %w", to, err)
 			}
 
-			cs, err := diff.Diff(prev, curr)
+			cs, lexical, err := diff.DiffWithLayer(prev, curr, diffLayer)
+			if err != nil {
+				if errors.Is(err, diff.ErrSemanticNotImplemented) {
+					fmt.Fprintln(os.Stderr, err.Error())
+					os.Exit(64)
+				}
+				return err
+			}
+
+			if diffLayer == diff.LayerLexical {
+				return diff.LexicalRenderer{}.Render(cs, lexical, os.Stdout)
+			}
+
+			renderer, err := diff.RendererFor(format)
 			if err != nil {
 				return err
 			}
@@ -60,6 +82,8 @@ func diffCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&form, "type", "t", "10-K", "filing form type (e.g. 10-K, 10-Q, 8-K)")
 	cmd.Flags().IntVar(&from, "from", 0, "earlier filing year")
 	cmd.Flags().IntVar(&to, "to", 0, "later filing year")
-	cmd.Flags().StringVarP(&format, "format", "f", "json", "output format (json, md)")
+	cmd.Flags().StringVarP(&format, "output", "o", "json", "output format (json, md)")
+	cmd.Flags().StringVarP(&format, "format", "f", "json", "output format (alias for --output)")
+	cmd.Flags().StringVar(&layer, "layer", "structural", "diff layer: structural (default), lexical, semantic")
 	return cmd
 }

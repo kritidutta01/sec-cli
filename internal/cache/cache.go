@@ -36,7 +36,7 @@ import (
 // user_version. Bumping it adds a migration step in migrate; it is independent
 // of model.SchemaVersion (the output contract) and model.ParserVersion (the
 // parsed-layer key).
-const schemaVersion = 1
+const schemaVersion = 2
 
 // FetchFunc is the fetch seam the cache wraps: the shape of edgar.Client.Get.
 type FetchFunc func(ctx context.Context, url string) ([]byte, error)
@@ -141,17 +141,17 @@ func (c *Cache) PutRaw(url string, body []byte) error {
 }
 
 // GetDocument returns the cached Document for accession under the current
-// model.ParserVersion, and whether it was present. A document cached under a
-// different parser version misses, so a parser fix invalidates parsed output
-// without touching the raw layer.
+// model.ParserVersion and model.SchemaVersion. A document cached under a
+// different parser or schema version misses, so either a parser fix or a schema
+// bump invalidates parsed output without touching the raw layer.
 func (c *Cache) GetDocument(accession string) (*model.Document, bool) {
 	if c == nil || c.db == nil {
 		return nil, false
 	}
 	var raw []byte
 	err := c.db.QueryRow(
-		"SELECT doc FROM parsed WHERE accession = ? AND parser_version = ?",
-		accession, model.ParserVersion,
+		"SELECT doc FROM parsed WHERE accession = ? AND parser_version = ? AND schema_version = ?",
+		accession, model.ParserVersion, model.SchemaVersion,
 	).Scan(&raw)
 	if err != nil {
 		return nil, false
@@ -165,8 +165,8 @@ func (c *Cache) GetDocument(accession string) (*model.Document, bool) {
 	return &doc, true
 }
 
-// PutDocument stores doc as canonical JSON keyed on accession + the current
-// model.ParserVersion. A no-op cache drops the write.
+// PutDocument stores doc as canonical JSON keyed on accession, model.ParserVersion,
+// and model.SchemaVersion. A no-op cache drops the write.
 func (c *Cache) PutDocument(accession string, doc *model.Document) error {
 	if c == nil || c.db == nil {
 		return nil
@@ -176,9 +176,9 @@ func (c *Cache) PutDocument(accession string, doc *model.Document) error {
 		return fmt.Errorf("cache: marshal document %s: %w", accession, err)
 	}
 	_, err = c.db.Exec(
-		"INSERT INTO parsed (accession, parser_version, doc, created_at) VALUES (?, ?, ?, ?) "+
-			"ON CONFLICT(accession, parser_version) DO UPDATE SET doc = excluded.doc, created_at = excluded.created_at",
-		accession, model.ParserVersion, raw, time.Now().Unix(),
+		"INSERT INTO parsed (accession, parser_version, schema_version, doc, created_at) VALUES (?, ?, ?, ?, ?) "+
+			"ON CONFLICT(accession, parser_version, schema_version) DO UPDATE SET doc = excluded.doc, created_at = excluded.created_at",
+		accession, model.ParserVersion, model.SchemaVersion, raw, time.Now().Unix(),
 	)
 	if err != nil {
 		return fmt.Errorf("cache: put document %s: %w", accession, err)
@@ -246,6 +246,17 @@ CREATE TABLE IF NOT EXISTS parsed (
 );`
 		if _, err := db.Exec(ddl); err != nil {
 			return fmt.Errorf("cache: create schema: %w", err)
+		}
+	}
+	if current < 2 {
+		// Add schema_version to the parsed key so a JSON schema bump also
+		// invalidates cached output without touching the raw layer.
+		const ddl2 = `
+ALTER TABLE parsed ADD COLUMN schema_version TEXT NOT NULL DEFAULT '';
+CREATE UNIQUE INDEX IF NOT EXISTS parsed_full_key
+	ON parsed (accession, parser_version, schema_version);`
+		if _, err := db.Exec(ddl2); err != nil {
+			return fmt.Errorf("cache: migrate to schema v2: %w", err)
 		}
 	}
 

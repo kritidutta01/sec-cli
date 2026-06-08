@@ -69,10 +69,11 @@ func main() {
 // command and the Python wrapper share.
 func getCmd() *cobra.Command {
 	var (
-		form    string
-		year    int
-		format  string
-		section string
+		form      string
+		year      int
+		format    string
+		section   string
+		accession string
 	)
 	cmd := &cobra.Command{
 		Use:   "get <ticker>",
@@ -90,10 +91,11 @@ func getCmd() *cobra.Command {
 			defer func() { _ = c.Close() }()
 
 			doc, err := pipeline.Run(cmd.Context(), pipeline.Options{
-				Ticker: args[0],
-				Form:   form,
-				Year:   year,
-				Cache:  c,
+				Ticker:    args[0],
+				Form:      form,
+				Year:      year,
+				Accession: accession,
+				Cache:     c,
 			})
 			if err != nil {
 				return err
@@ -109,14 +111,17 @@ func getCmd() *cobra.Command {
 	}
 	cmd.Flags().StringVarP(&form, "type", "t", "10-K", "filing form type (e.g. 10-K, 10-Q, 8-K)")
 	cmd.Flags().IntVar(&year, "year", 0, "target filing year (default: latest)")
-	cmd.Flags().StringVarP(&format, "format", "f", "json", "output format (json, md, text)")
+	cmd.Flags().StringVarP(&format, "output", "o", "json", "output format (json, md, text)")
+	cmd.Flags().StringVarP(&format, "format", "f", "json", "output format (alias for --output)")
 	cmd.Flags().StringVar(&section, "section", "", "render only the section matching this item id or title substring")
+	cmd.Flags().StringVar(&accession, "accession", "", "pin to a specific accession number (overrides --year)")
 	return cmd
 }
 
 // filterSection narrows a document to the single section the user named — by
 // item id (e.g. "1A") or a title substring — for focused output. The
 // financial-statements section additionally carries the projected statements.
+// On no match it exits with code 1 and lists available sections.
 func filterSection(doc *model.Document, sel string) (*model.Document, error) {
 	needle := strings.ToLower(strings.TrimSpace(sel))
 	for _, s := range doc.Sections {
@@ -128,7 +133,13 @@ func filterSection(doc *model.Document, sel string) (*model.Document, error) {
 			return out, nil
 		}
 	}
-	return nil, fmt.Errorf("no section matching %q", sel)
+	// List available sections so the user knows what to ask for.
+	fmt.Fprintf(os.Stderr, "sec-cli: no section matching %q\n\nAvailable sections:\n", sel)
+	for _, s := range doc.Sections {
+		fmt.Fprintf(os.Stderr, "  Item %-4s  %s\n", s.Item, s.Title)
+	}
+	os.Exit(1)
+	return nil, nil // unreachable
 }
 
 // latestCmd prints the accession number of a company's most recent filing of a

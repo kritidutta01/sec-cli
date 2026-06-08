@@ -16,6 +16,8 @@ type Markdown struct{}
 // Render writes doc as Markdown.
 func (Markdown) Render(doc *model.Document, w io.Writer) error {
 	var b strings.Builder
+	// Schema/version stamp so downstream consumers know the contract they are reading.
+	fmt.Fprintf(&b, "<!-- sec-cli v%s schema %s -->\n\n", doc.Metadata.ParserVersion, doc.Metadata.SchemaVersion)
 	if h := docHeading(doc.Metadata); h != "" {
 		fmt.Fprintf(&b, "# %s\n\n", h)
 	}

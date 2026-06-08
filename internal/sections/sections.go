@@ -422,19 +422,74 @@ var itemByKey = func() map[string]itemSpec {
 	return m
 }()
 
+// eightKItemSpecs is the canonical 8-K item map. 8-K items use dotted
+// sub-numbering (e.g. "Item 1.01") rather than the letter suffixes of 10-K.
+var eightKItemSpecs = []itemSpec{
+	{"1.01", "Entry into a Material Definitive Agreement", []string{"entry into a material definitive agreement"}},
+	{"1.02", "Termination of a Material Definitive Agreement", []string{"termination of a material definitive agreement"}},
+	{"1.03", "Bankruptcy or Receivership", []string{"bankruptcy or receivership"}},
+	{"1.04", "Mine Safety - Reporting of Shutdowns and Patterns of Violations", []string{"mine safety"}},
+	{"2.01", "Completion of Acquisition or Disposition of Assets", []string{"completion of acquisition or disposition"}},
+	{"2.02", "Results of Operations and Financial Condition", []string{"results of operations and financial condition"}},
+	{"2.03", "Creation of a Direct Financial Obligation", []string{"creation of a direct financial obligation"}},
+	{"2.04", "Triggering Events That Accelerate or Increase a Direct Financial Obligation", []string{"triggering events that accelerate"}},
+	{"2.05", "Cost Associated with Exit or Disposal Activities", []string{"cost associated with exit or disposal"}},
+	{"2.06", "Material Impairments", []string{"material impairments"}},
+	{"3.01", "Notice of Delisting or Failure to Satisfy a Continued Listing Rule", []string{"notice of delisting"}},
+	{"3.02", "Unregistered Sales of Equity Securities", []string{"unregistered sales of equity"}},
+	{"3.03", "Material Modification to Rights of Security Holders", []string{"material modification to rights"}},
+	{"4.01", "Changes in Registrant's Certifying Accountant", []string{"changes in registrant's certifying accountant", "changes in registrant"}},
+	{"4.02", "Non-Reliance on Previously Issued Financial Statements", []string{"non-reliance on previously issued"}},
+	{"5.01", "Changes in Control of Registrant", []string{"changes in control of registrant"}},
+	{"5.02", "Departure of Directors or Certain Officers", []string{"departure of directors or certain officers"}},
+	{"5.03", "Amendments to Articles of Incorporation or Bylaws", []string{"amendments to articles of incorporation"}},
+	{"5.04", "Temporary Suspension of Trading Under Registrant's Employee Benefit Plans", []string{"temporary suspension of trading"}},
+	{"5.05", "Amendments to the Registrant's Code of Ethics", []string{"amendments to the registrant's code of ethics"}},
+	{"5.06", "Change in Shell Company Status", []string{"change in shell company status"}},
+	{"5.07", "Submission of Matters to a Vote of Security Holders", []string{"submission of matters to a vote"}},
+	{"5.08", "Shareholder Director Nominations", []string{"shareholder director nominations"}},
+	{"6.01", "ABS Informational and Computational Material", []string{"abs informational"}},
+	{"7.01", "Regulation FD Disclosure", []string{"regulation fd disclosure"}},
+	{"8.01", "Other Events", []string{"other events"}},
+	{"9.01", "Financial Statements and Exhibits", []string{"financial statements and exhibits"}},
+}
+
+// eightKItemByKey indexes eightKItemSpecs by dotted id.
+var eightKItemByKey = func() map[string]itemSpec {
+	m := make(map[string]itemSpec, len(eightKItemSpecs))
+	for _, s := range eightKItemSpecs {
+		m[s.id] = s
+	}
+	return m
+}()
+
 var (
-	itemPrefixRe = regexp.MustCompile(`(?i)^item\s+(\d{1,2})\s*([a-c])?\b`)
-	itemAnyRe    = regexp.MustCompile(`(?i)\bitem\s+(\d{1,2})\s*([a-c])?\b`)
+	itemPrefixRe    = regexp.MustCompile(`(?i)^item\s+(\d{1,2})\s*([a-c])?\b`)
+	itemAnyRe       = regexp.MustCompile(`(?i)\bitem\s+(\d{1,2})\s*([a-c])?\b`)
+	eightKPrefixRe  = regexp.MustCompile(`(?i)^item\s+(\d+\.\d+)\b`)
+	eightKAnyRe     = regexp.MustCompile(`(?i)\bitem\s+(\d+\.\d+)\b`)
 )
 
 // classifyItem maps heading or TOC text to a canonical item. It first reads an
-// "Item N" / "Item NA" form, then falls back to the canonical title fragments.
-// When anchored is true the text must begin with the item (the heading path,
-// which guards against an in-prose "see Item 1A" matching); otherwise the item
-// may appear anywhere (the TOC path).
+// "Item N" / "Item NA" form (10-K/10-Q) or "Item N.NN" form (8-K), then falls
+// back to the canonical title fragments. When anchored is true the text must
+// begin with the item (the heading path); otherwise the item may appear
+// anywhere (the TOC path).
 func classifyItem(text string, anchored bool) (id, title string, ok bool) {
 	t := normalize(text)
 
+	// Try 8-K dotted-item pattern first (non-overlapping with 10-K pattern).
+	re8K := eightKAnyRe
+	if anchored {
+		re8K = eightKPrefixRe
+	}
+	if m := re8K.FindStringSubmatch(t); m != nil {
+		if spec, found := eightKItemByKey[m[1]]; found {
+			return spec.id, spec.title, true
+		}
+	}
+
+	// 10-K / 10-Q item pattern.
 	re := itemAnyRe
 	if anchored {
 		re = itemPrefixRe
@@ -446,14 +501,17 @@ func classifyItem(text string, anchored bool) (id, title string, ok bool) {
 		}
 	}
 
+	// Title-fragment fallback: try 8-K specs first, then 10-K specs.
 	low := strings.ToLower(t)
-	for _, s := range itemSpecs {
-		for _, k := range s.keys {
-			if anchored && strings.HasPrefix(low, k) {
-				return s.id, s.title, true
-			}
-			if !anchored && strings.Contains(low, k) {
-				return s.id, s.title, true
+	for _, specs := range [][]itemSpec{eightKItemSpecs, itemSpecs} {
+		for _, s := range specs {
+			for _, k := range s.keys {
+				if anchored && strings.HasPrefix(low, k) {
+					return s.id, s.title, true
+				}
+				if !anchored && strings.Contains(low, k) {
+					return s.id, s.title, true
+				}
 			}
 		}
 	}

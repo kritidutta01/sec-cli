@@ -14,6 +14,33 @@ import (
 	"github.com/kritidutta01/sec-cli/internal/model"
 )
 
+// Layer selects the granularity of the narrative diff.
+type Layer string
+
+// Layer constants match the --layer flag values from DESIGN.md.
+const (
+	LayerStructural Layer = "structural" // subsection-grain add/remove/modify (default)
+	LayerSemantic   Layer = "semantic"   // embedding-distance ranking (v1.0.1, not yet implemented)
+	LayerLexical    Layer = "lexical"    // word-level diff via diffmatchpatch
+)
+
+// DiffWithLayer runs a structural diff and, for the lexical layer, annotates
+// modified paragraphs with word-level diffs. The semantic layer returns
+// ErrSemanticNotImplemented.
+func DiffWithLayer(prev, curr *model.Document, layer Layer) (*ChangeSet, []LexicalSectionDiff, error) {
+	if layer == LayerSemantic {
+		return nil, nil, ErrSemanticNotImplemented
+	}
+	cs, err := Diff(prev, curr)
+	if err != nil {
+		return nil, nil, err
+	}
+	if layer == LayerLexical {
+		return cs, DiffLexicalSections(cs, nil, nil), nil
+	}
+	return cs, nil, nil
+}
+
 // ChangeKind classifies a single change. A row or paragraph is added when it
 // appears only in the current filing, removed when only in the previous,
 // changed when present in both with differing values, and unchanged when
