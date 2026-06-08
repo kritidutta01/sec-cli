@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Synthetic Umbrella 10-K: a MIXED filing. The Item 8 income statement is fully
+     fact-tagged, but the Item 6 selected-financial-data table is plain HTML with
+     untagged figures. Six of the ten financial-figure cells carry a fact wrapper
+     (density 0.6), so the router classifies the filing PartialIXBRL while the
+     income statement still projects cleanly from the fact stream. This is the
+     corpus's PartialIXBRL entry. -->
+<html xmlns:ix="http://www.xbrl.org/2013/inlineXBRL" xmlns:xbrli="http://www.xbrl.org/2003/instance">
+<body>
+<ix:header><ix:resources>
+  <xbrli:context id="dur-2024">
+    <xbrli:entity><xbrli:identifier scheme="http://www.sec.gov/CIK">0009990001</xbrli:identifier></xbrli:entity>
+    <xbrli:period><xbrli:startDate>2024-01-01</xbrli:startDate><xbrli:endDate>2024-12-31</xbrli:endDate></xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="dur-2023">
+    <xbrli:entity><xbrli:identifier scheme="http://www.sec.gov/CIK">0009990001</xbrli:identifier></xbrli:entity>
+    <xbrli:period><xbrli:startDate>2023-01-01</xbrli:startDate><xbrli:endDate>2023-12-31</xbrli:endDate></xbrli:period>
+  </xbrli:context>
+</ix:resources></ix:header>
+
+<table>
+<tr><td><a href="#item1">Item 1. Business</a></td></tr>
+<tr><td><a href="#item6">Item 6. Selected Financial Data</a></td></tr>
+<tr><td><a href="#item8">Item 8. Financial Statements and Supplementary Data</a></td></tr>
+</table>
+
+<h2 id="item1">Item 1. Business</h2>
+<p>Umbrella Corporation researches and manufactures pharmaceutical products.</p>
+
+<h2 id="item6">Item 6. Selected Financial Data</h2>
+<p>The following five-year selected data is presented in plain HTML and is not fact-tagged.</p>
+<table>
+<tr><td>Total assets</td><td>1200</td><td>980</td></tr>
+<tr><td>Total equity</td><td>760</td><td>540</td></tr>
+</table>
+
+<h2 id="item8">Item 8. Financial Statements and Supplementary Data</h2>
+<table>
+<tr><td>Revenue</td>
+  <td><ix:nonFraction name="umbr:Revenues" contextRef="dur-2024" unitRef="usd" scale="6" id="r24">820</ix:nonFraction></td>
+  <td><ix:nonFraction name="umbr:Revenues" contextRef="dur-2023" unitRef="usd" scale="6" id="r23">780</ix:nonFraction></td></tr>
+<tr><td>Cost of sales</td>
+  <td><ix:nonFraction name="umbr:CostOfSales" contextRef="dur-2024" unitRef="usd" scale="6" id="c24">500</ix:nonFraction></td>
+  <td><ix:nonFraction name="umbr:CostOfSales" contextRef="dur-2023" unitRef="usd" scale="6" id="c23">470</ix:nonFraction></td></tr>
+<tr><td>Net income</td>
+  <td><ix:nonFraction name="umbr:NetIncome" contextRef="dur-2024" unitRef="usd" scale="6" id="ni24">150</ix:nonFraction></td>
+  <td><ix:nonFraction name="umbr:NetIncome" contextRef="dur-2023" unitRef="usd" scale="6" id="ni23">140</ix:nonFraction></td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "_comment": "Hand-verified truth for the Initech FY2024 10-K. No TOC, so sections come from the heading-pattern path (medium); the FY2023 cost-of-sales cell is genuinely absent and must score as null. Medium-confidence calibration point.",
+  "ticker": "INTH",
+  "form": "10-K",
+  "format": "IXBRL",
+  "confidence": "medium",
+  "sections": ["1", "7", "8"],
+  "statements": [
+    {
+      "role": "http://initech.example/role/StatementsOfIncome",
+      "title": "StatementsOfIncome",
+      "cells": [
+        {"concept": "inth:Revenues", "period": "2024", "value": 300000000},
+        {"concept": "inth:Revenues", "period": "2023", "value": 290000000},
+        {"concept": "inth:CostOfSales", "period": "2024", "value": 180000000},
+        {"concept": "inth:CostOfSales", "period": "2023", "value": null},
+        {"concept": "inth:NetIncome", "period": "2024", "value": 70000000},
+        {"concept": "inth:NetIncome", "period": "2023", "value": 65000000}
+      ]
+    }
+  ]
+}

@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/kritidutta01/sec-cli/internal/model"
 	"golang.org/x/net/html"
 )
 
@@ -20,13 +22,13 @@ func parseTable(t *testing.T, fragment string) *html.Node {
 	return tbl
 }
 
-func layoutRowByLabel(tbl *Table, label string) (Row, bool) {
+func layoutRowByLabel(tbl *model.Table, label string) (model.Row, bool) {
 	for _, r := range tbl.Rows {
 		if r.Label == label {
 			return r, true
 		}
 	}
-	return Row{}, false
+	return model.Row{}, false
 }
 
 // Phase 1: header resolution — a spanning title row is lifted out of the column
@@ -110,13 +112,13 @@ func TestLayoutRowClassification(t *testing.T) {
 </table>`))
 
 	cost, _ := layoutRowByLabel(tbl, "Cost of sales")
-	require.Equal(t, RowData, cost.Type)
+	require.Equal(t, model.RowData, cost.Type)
 
 	sub, _ := layoutRowByLabel(tbl, "Total segment costs")
-	require.Equal(t, RowSubtotal, sub.Type, "unformatted Total is a subtotal")
+	require.Equal(t, model.RowSubtotal, sub.Type, "unformatted Total is a subtotal")
 
 	tot, _ := layoutRowByLabel(tbl, "Total costs and expenses")
-	require.Equal(t, RowTotal, tot.Type, "bold/border-top Total is a total")
+	require.Equal(t, model.RowTotal, tot.Type, "bold/border-top Total is a total")
 }
 
 // Phase 5: structured emit — leftmost cell is the label, the rest are values,
@@ -177,7 +179,7 @@ func TestLayoutAAPLNarrative(t *testing.T) {
 	// category rows — proof the columns are aligned, not merely populated.
 	total, ok := layoutRowByLabel(tbl, "Total net sales")
 	require.True(t, ok)
-	require.Equal(t, RowTotal, total.Type)
+	require.Equal(t, model.RowTotal, total.Type)
 	require.Equal(t, 391035.0, *total.Values[0])
 
 	var sum float64
@@ -190,7 +192,7 @@ func TestLayoutAAPLNarrative(t *testing.T) {
 }
 
 // columnLabels and values are small assertion helpers.
-func columnLabels(tbl *Table) []string {
+func columnLabels(tbl *model.Table) []string {
 	out := make([]string, len(tbl.Columns))
 	for i, c := range tbl.Columns {
 		out[i] = c.Label
@@ -198,7 +200,7 @@ func columnLabels(tbl *Table) []string {
 	return out
 }
 
-func values(r Row) []float64 {
+func values(r model.Row) []float64 {
 	out := make([]float64, len(r.Values))
 	for i, v := range r.Values {
 		if v != nil {

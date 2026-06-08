@@ -6,26 +6,28 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/kritidutta01/sec-cli/internal/model"
 )
 
 // rowByLabel returns the projected row with the given display label.
-func rowByLabel(tbl *Table, label string) (Row, bool) {
+func rowByLabel(tbl *model.Table, label string) (model.Row, bool) {
 	for _, r := range tbl.Rows {
 		if r.Label == label {
 			return r, true
 		}
 	}
-	return Row{}, false
+	return model.Row{}, false
 }
 
 // rowByLabelContains returns the first row whose label contains substr.
-func rowByLabelContains(tbl *Table, substr string) (Row, bool) {
+func rowByLabelContains(tbl *model.Table, substr string) (model.Row, bool) {
 	for _, r := range tbl.Rows {
 		if strings.Contains(r.Label, substr) {
 			return r, true
 		}
 	}
-	return Row{}, false
+	return model.Row{}, false
 }
 
 func mustDate(s string) time.Time {
@@ -38,7 +40,7 @@ func mustDate(s string) time.Time {
 
 // projectFixture loads a linkbase + facts fixture set and projects the single
 // role it defines.
-func projectFixture(t *testing.T, preXML, labXML, factsHTM string, titles map[string]string) *Table {
+func projectFixture(t *testing.T, preXML, labXML, factsHTM string, titles map[string]string) *model.Table {
 	t.Helper()
 	roles, err := ParseLinkbase(readFixture(t, preXML), readFixture(t, labXML), titles)
 	require.NoError(t, err)
@@ -49,13 +51,13 @@ func projectFixture(t *testing.T, preXML, labXML, factsHTM string, titles map[st
 }
 
 // rowByConcept returns the projected row for a concept.
-func rowByConcept(tbl *Table, concept string) (Row, bool) {
+func rowByConcept(tbl *model.Table, concept string) (model.Row, bool) {
 	for _, r := range tbl.Rows {
 		if r.Concept == concept {
 			return r, true
 		}
 	}
-	return Row{}, false
+	return model.Row{}, false
 }
 
 func TestProjectTable_Synthetic(t *testing.T) {
@@ -76,7 +78,7 @@ func TestProjectTable_Synthetic(t *testing.T) {
 	rev, ok := rowByConcept(tbl, "acme:Revenues")
 	require.True(t, ok)
 	require.Equal(t, "Revenue", rev.Label)
-	require.Equal(t, RowData, rev.Type)
+	require.Equal(t, model.RowData, rev.Type)
 	require.NotNil(t, rev.Values[0])
 	require.InDelta(t, 1000e6, *rev.Values[0], 1)
 	require.InDelta(t, 900e6, *rev.Values[1], 1)
@@ -88,11 +90,11 @@ func TestProjectTable_Synthetic(t *testing.T) {
 
 	// Row typing: totalLabel → total, non-abstract parent → subtotal, leaf → data.
 	gp, _ := rowByConcept(tbl, "acme:GrossProfit")
-	require.Equal(t, RowTotal, gp.Type)
+	require.Equal(t, model.RowTotal, gp.Type)
 	opex, _ := rowByConcept(tbl, "acme:OperatingExpenses")
-	require.Equal(t, RowTotal, opex.Type)
+	require.Equal(t, model.RowTotal, opex.Type)
 	ce, _ := rowByConcept(tbl, "acme:CostsAndExpenses")
-	require.Equal(t, RowSubtotal, ce.Type)
+	require.Equal(t, model.RowSubtotal, ce.Type)
 
 	// One null cell out of fourteen → medium, with the gap reported.
 	require.Equal(t, "medium", tbl.Confidence.Level)
@@ -173,7 +175,7 @@ func TestProjectTable_AAPLIncome(t *testing.T) {
 	sales, ok := rowByConcept(tbl, "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax")
 	require.True(t, ok)
 	require.Equal(t, "Net sales", sales.Label)
-	require.Equal(t, RowData, sales.Type)
+	require.Equal(t, model.RowData, sales.Type)
 	require.InDelta(t, 391035e6, *sales.Values[0], 1)
 	require.InDelta(t, 383285e6, *sales.Values[1], 1)
 	require.InDelta(t, 394328e6, *sales.Values[2], 1)
@@ -181,15 +183,15 @@ func TestProjectTable_AAPLIncome(t *testing.T) {
 	// "Total operating expenses" is a total; gross margin and net income too.
 	opex, _ := rowByConcept(tbl, "us-gaap:OperatingExpenses")
 	require.Equal(t, "Total operating expenses", opex.Label)
-	require.Equal(t, RowTotal, opex.Type)
+	require.Equal(t, model.RowTotal, opex.Type)
 	require.InDelta(t, 57467e6, *opex.Values[0], 1)
 
 	gp, _ := rowByConcept(tbl, "us-gaap:GrossProfit")
-	require.Equal(t, RowTotal, gp.Type)
+	require.Equal(t, model.RowTotal, gp.Type)
 	require.InDelta(t, 180683e6, *gp.Values[0], 1)
 
 	ni, _ := rowByConcept(tbl, "us-gaap:NetIncomeLoss")
-	require.Equal(t, RowTotal, ni.Type)
+	require.Equal(t, model.RowTotal, ni.Type)
 	require.InDelta(t, 93736e6, *ni.Values[0], 1)
 
 	// Every cell resolved → high confidence, nothing untagged.
@@ -215,7 +217,7 @@ func TestProjectTable_AAPLBalanceSheet(t *testing.T) {
 	// Total assets ties to total liabilities and equity — the sheet balances.
 	assets, ok := rowByConcept(tbl, "us-gaap:Assets")
 	require.True(t, ok)
-	require.Equal(t, RowTotal, assets.Type)
+	require.Equal(t, model.RowTotal, assets.Type)
 	require.InDelta(t, 364980e6, *assets.Values[0], 1)
 	require.InDelta(t, 352583e6, *assets.Values[1], 1)
 	liabEq, _ := rowByConcept(tbl, "us-gaap:LiabilitiesAndStockholdersEquity")
@@ -259,7 +261,7 @@ func TestProjectTable_AAPLCashFlow(t *testing.T) {
 
 	op, ok := rowByConcept(tbl, "us-gaap:NetCashProvidedByUsedInOperatingActivities")
 	require.True(t, ok)
-	require.Equal(t, RowTotal, op.Type)
+	require.Equal(t, model.RowTotal, op.Type)
 	require.InDelta(t, 118254e6, *op.Values[0], 1)
 
 	// Opening and closing balances are instant facts placed into the duration

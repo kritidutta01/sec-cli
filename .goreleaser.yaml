@@ -1,0 +1,62 @@
+# goreleaser configuration for sec-cli.
+#
+# Builds static, cgo-free binaries for linux/macOS/windows on amd64/arm64 and
+# publishes them to GitHub Releases on tag. CGO is disabled on every target (the
+# pure-Go SQLite driver and the no-cgo principle make this possible), so each
+# binary is a single self-contained file the Python wheel can bundle.
+#
+# Validate locally with:  goreleaser check
+# Dry-run a release with:  goreleaser release --snapshot --clean
+version: 2
+
+project_name: sec-cli
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: sec-cli
+    main: ./cmd/sec-cli
+    binary: sec-cli
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    # The git tag drives the binary's version string via the linker, overriding
+    # the 0.0.0-dev sentinel in cmd/sec-cli/main.go.
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+
+archives:
+  - id: sec-cli
+    formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-snapshot"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+release:
+  github:
+    owner: kritidutta01
+    name: sec-cli

@@ -1,0 +1,151 @@
+{
+  "metadata": {
+    "cik": 1234567,
+    "ticker": "ACME",
+    "form": "10-K",
+    "accession": "0001234567-24-000001",
+    "filing_date": "2024-11-01",
+    "period_end": "2024-12-31",
+    "schema_version": "1.0.0",
+    "parser_version": "0.1.0",
+    "source": {
+      "extractor": "pipeline",
+      "parser_version": "0.1.0"
+    },
+    "confidence": {
+      "level": "medium",
+      "row_match_rate": 0.8571428571428571,
+      "cell_resolved_rate": 0.9285714285714286,
+      "untagged_cell_count": 1
+    }
+  },
+  "sections": [
+    {
+      "item": "1",
+      "title": "Business",
+      "kind": "narrative",
+      "text": "Item 1. Business\n\nAcme Corporation designs and sells widgets. Fiscal year focus: 2024."
+    },
+    {
+      "item": "1A",
+      "title": "Risk Factors",
+      "kind": "narrative",
+      "text": "Item 1A. Risk Factors\n\nOur results are subject to risks. Widget markets fluctuate with demand."
+    },
+    {
+      "item": "7",
+      "title": "Management's Discussion and Analysis",
+      "kind": "narrative",
+      "text": "Item 7. Management's Discussion and Analysis\n\nRevenue grew year over year as widget shipments increased."
+    },
+    {
+      "item": "8",
+      "title": "Financial Statements and Supplementary Data",
+      "kind": "financial",
+      "text": "Item 8. Financial Statements and Supplementary Data\n\nRevenue 1,000 900\n\nCost of sales 600 550\n\nGross profit 400 350\n\nCosts and expenses 130 120\n\nResearch and development 50\n\nTotal operating expenses 80 70\n\nNet income 320 280"
+    }
+  ],
+  "statements": [
+    {
+      "schema_version": "1.0.0",
+      "title": "StatementsOfIncome",
+      "role_uri": "http://acme.example/role/StatementsOfIncome",
+      "columns": [
+        {
+          "label": "2024",
+          "context_ref": "dur-2024",
+          "period_start": "2024-01-01",
+          "period_end": "2024-12-31"
+        },
+        {
+          "label": "2023",
+          "context_ref": "dur-2023",
+          "period_start": "2023-01-01",
+          "period_end": "2023-12-31"
+        }
+      ],
+      "rows": [
+        {
+          "label": "Revenue",
+          "concept": "acme:Revenues",
+          "type": "data",
+          "depth": 1,
+          "values": [
+            1000000000,
+            900000000
+          ]
+        },
+        {
+          "label": "Cost of sales",
+          "concept": "acme:CostOfSales",
+          "type": "data",
+          "depth": 1,
+          "values": [
+            600000000,
+            550000000
+          ]
+        },
+        {
+          "label": "Gross profit",
+          "concept": "acme:GrossProfit",
+          "type": "total",
+          "depth": 1,
+          "values": [
+            400000000,
+            350000000
+          ]
+        },
+        {
+          "label": "Costs and expenses",
+          "concept": "acme:CostsAndExpenses",
+          "type": "subtotal",
+          "depth": 1,
+          "values": [
+            130000000,
+            120000000
+          ]
+        },
+        {
+          "label": "Research and development",
+          "concept": "acme:ResearchExpense",
+          "type": "data",
+          "depth": 2,
+          "values": [
+            50000000,
+            null
+          ]
+        },
+        {
+          "label": "Total operating expenses",
+          "concept": "acme:OperatingExpenses",
+          "type": "total",
+          "depth": 2,
+          "values": [
+            80000000,
+            70000000
+          ]
+        },
+        {
+          "label": "Net income",
+          "concept": "acme:NetIncome",
+          "type": "total",
+          "depth": 1,
+          "values": [
+            320000000,
+            280000000
+          ]
+        }
+      ],
+      "confidence": {
+        "level": "medium",
+        "row_match_rate": 0.8571428571428571,
+        "cell_resolved_rate": 0.9285714285714286,
+        "untagged_cell_count": 1
+      },
+      "source": {
+        "extractor": "ixbrl.facts",
+        "parser_version": "0.1.0"
+      }
+    }
+  ]
+}

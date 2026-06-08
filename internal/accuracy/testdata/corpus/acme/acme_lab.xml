@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic label linkbase paired with synthetic-income_pre.xml. Each concept
+     carries a standard label plus the preferred-role label the presentation arc
+     points at, so resolution must honour the arc's preferredLabel (e.g. Revenues
+     resolves to the terse "Revenue", OperatingExpenses to "Total operating
+     expenses") rather than always taking the standard label. -->
+<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xml="http://www.w3.org/XML/1998/namespace">
+  <link:labelLink xlink:type="extended" xlink:role="http://www.xbrl.org/2003/role/link">
+    <link:loc xlink:type="locator" xlink:label="loc_Revenues" xlink:href="acme.xsd#acme_Revenues"/>
+    <link:loc xlink:type="locator" xlink:label="loc_CostOfSales" xlink:href="acme.xsd#acme_CostOfSales"/>
+    <link:loc xlink:type="locator" xlink:label="loc_GrossProfit" xlink:href="acme.xsd#acme_GrossProfit"/>
+    <link:loc xlink:type="locator" xlink:label="loc_CostsAndExpenses" xlink:href="acme.xsd#acme_CostsAndExpenses"/>
+    <link:loc xlink:type="locator" xlink:label="loc_ResearchExpense" xlink:href="acme.xsd#acme_ResearchExpense"/>
+    <link:loc xlink:type="locator" xlink:label="loc_OperatingExpenses" xlink:href="acme.xsd#acme_OperatingExpenses"/>
+    <link:loc xlink:type="locator" xlink:label="loc_NetIncome" xlink:href="acme.xsd#acme_NetIncome"/>
+
+    <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="loc_Revenues" xlink:to="lab_Revenues"/>
+    <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="loc_CostOfSales" xlink:to="lab_CostOfSales"/>
+    <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="loc_GrossProfit" xlink:to="lab_GrossProfit"/>
+    <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="loc_CostsAndExpenses" xlink:to="lab_CostsAndExpenses"/>
+    <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="loc_ResearchExpense" xlink:to="lab_ResearchExpense"/>
+    <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="loc_OperatingExpenses" xlink:to="lab_OperatingExpenses"/>
+    <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="loc_NetIncome" xlink:to="lab_NetIncome"/>
+
+    <link:label xlink:type="resource" xlink:label="lab_Revenues" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US">Revenue, net</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_Revenues" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US">Revenue</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_CostOfSales" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US">Cost of sales</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_GrossProfit" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US">Gross profit</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_GrossProfit" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US">Gross profit</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_CostsAndExpenses" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US">Costs and expenses</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_CostsAndExpenses" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US">Costs and expenses</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_ResearchExpense" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US">Research and development expense</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_ResearchExpense" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US">Research and development</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_OperatingExpenses" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US">Operating expenses</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_OperatingExpenses" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US">Total operating expenses</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_NetIncome" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US">Net income (loss)</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_NetIncome" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US">Net income</link:label>
+  </link:labelLink>
+</link:linkbase>

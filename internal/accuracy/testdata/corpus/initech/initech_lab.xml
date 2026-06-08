@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Label linkbase for the Initech income statement. -->
+<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xml="http://www.w3.org/XML/1998/namespace">
+  <link:labelLink xlink:type="extended" xlink:role="http://www.xbrl.org/2003/role/link">
+    <link:loc xlink:type="locator" xlink:label="loc_Revenues" xlink:href="initech.xsd#inth_Revenues"/>
+    <link:loc xlink:type="locator" xlink:label="loc_CostOfSales" xlink:href="initech.xsd#inth_CostOfSales"/>
+    <link:loc xlink:type="locator" xlink:label="loc_NetIncome" xlink:href="initech.xsd#inth_NetIncome"/>
+
+    <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="loc_Revenues" xlink:to="lab_Revenues"/>
+    <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="loc_CostOfSales" xlink:to="lab_CostOfSales"/>
+    <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="loc_NetIncome" xlink:to="lab_NetIncome"/>
+
+    <link:label xlink:type="resource" xlink:label="lab_Revenues" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US">Revenue, net</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_Revenues" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US">Revenue</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_CostOfSales" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US">Cost of sales</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_CostOfSales" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US">Cost of sales</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_NetIncome" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US">Net income (loss)</link:label>
+    <link:label xlink:type="resource" xlink:label="lab_NetIncome" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US">Net income</link:label>
+  </link:labelLink>
+</link:linkbase>

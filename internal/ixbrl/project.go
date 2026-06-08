@@ -1,109 +1,19 @@
 package ixbrl
 
 import (
-	"encoding/json"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/kritidutta01/sec-cli/internal/model"
 )
 
-// schemaVersion and parserVersion stamp projected output. schemaVersion tracks
-// the JSON output contract (semver, consumer-facing); parserVersion tracks the
-// extraction code so the cache (Phase 10) can invalidate parsed output on a
-// parser fix without re-fetching. Both are placeholders here and move to
-// internal/model in Phase 9.
-const (
-	schemaVersion  = "1.0.0"
-	parserVersion  = "0.1.0"
-	extractorFacts = "ixbrl.facts"
+// extractorFacts identifies the fact-stream extractor on a table's Source.
+const extractorFacts = "ixbrl.facts"
 
-	dateLayout = "2006-01-02"
-)
-
-// RowType classifies a statement row. A total caps a section, a subtotal is a
-// parent line that also carries a value, and data is a leaf line item.
-type RowType string
-
-const (
-	RowData     RowType = "data"
-	RowSubtotal RowType = "subtotal"
-	RowTotal    RowType = "total"
-)
-
-// Table is a financial statement projected from the fact stream onto rows ×
-// columns. It is a placeholder for the internal/model.Table that Phase 9 will
-// promote; the JSON tags already track the design's output schema.
-type Table struct {
-	SchemaVersion string            `json:"schema_version"`
-	Title         string            `json:"title,omitempty"`
-	RoleURI       string            `json:"role_uri,omitempty"`
-	Columns       []Column          `json:"columns"`
-	Rows          []Row             `json:"rows"`
-	Footnotes     map[string]string `json:"footnotes,omitempty"`
-	Confidence    Confidence        `json:"confidence"`
-	Source        Source            `json:"source"`
-}
-
-// Column is one reporting period: the contextRef whose facts fill the column and
-// the period it covers.
-type Column struct {
-	Label       string
-	ContextRef  string
-	PeriodStart time.Time
-	PeriodEnd   time.Time
-	Instant     bool
-}
-
-// MarshalJSON renders period dates as plain YYYY-MM-DD, matching the design's
-// output schema rather than Go's default RFC3339 time encoding.
-func (c Column) MarshalJSON() ([]byte, error) {
-	out := struct {
-		Label       string `json:"label"`
-		ContextRef  string `json:"context_ref,omitempty"`
-		PeriodStart string `json:"period_start,omitempty"`
-		PeriodEnd   string `json:"period_end,omitempty"`
-		Instant     bool   `json:"instant,omitempty"`
-	}{
-		Label:      c.Label,
-		ContextRef: c.ContextRef,
-		Instant:    c.Instant,
-	}
-	// Layout-extracted columns have no reporting period; omit the date fields
-	// rather than render a zero time.
-	if !c.PeriodStart.IsZero() {
-		out.PeriodStart = c.PeriodStart.Format(dateLayout)
-	}
-	if !c.PeriodEnd.IsZero() {
-		out.PeriodEnd = c.PeriodEnd.Format(dateLayout)
-	}
-	return json.Marshal(out)
-}
-
-// Row is one statement line: a concept, its filing label, and its value in each
-// column. A nil entry in Values is a cell with no matching fact — null, never
-// zero.
-type Row struct {
-	Label   string     `json:"label"`
-	Concept string     `json:"concept,omitempty"`
-	Type    RowType    `json:"type"`
-	Depth   int        `json:"depth,omitempty"`
-	Values  []*float64 `json:"values"`
-}
-
-// Confidence is the calibrated trust signal for a projected table, derived from
-// how completely the fact stream filled the linkbase's rows and columns.
-type Confidence struct {
-	Level             string  `json:"level"`
-	RowMatchRate      float64 `json:"row_match_rate"`
-	CellResolvedRate  float64 `json:"cell_resolved_rate"`
-	UntaggedCellCount int     `json:"untagged_cell_count"`
-}
-
-// Source records which extractor produced the table and the parser version.
-type Source struct {
-	Extractor     string `json:"extractor"`
-	ParserVersion string `json:"parser_version"`
-}
+// dateLayout is the ISO layout used for the instant index keys and column
+// labels in projection.
+const dateLayout = "2006-01-02"
 
 // factKey indexes a fact by its concept and reporting context.
 type factKey struct{ concept, ctx string }
@@ -116,7 +26,7 @@ type instantKey struct{ concept, date string }
 // order; columns are the primary (consolidated, unsegmented) contexts that carry
 // facts for those concepts, newest period first. Each cell is the fact matching
 // (concept, contextRef), or null when none exists.
-func ProjectTable(role LinkbaseRole, facts []Fact, contexts map[string]Context) *Table {
+func ProjectTable(role LinkbaseRole, facts []Fact, contexts map[string]Context) *model.Table {
 	// Index consolidated numeric facts by concept and context. Segment-scoped
 	// facts (per-product, per-class) share concepts with the consolidated line
 	// and are excluded so a row reads its consolidated value, not a breakdown.
@@ -148,13 +58,13 @@ func ProjectTable(role LinkbaseRole, facts []Fact, contexts map[string]Context) 
 
 	columns := projectColumns(rowConcepts, values, contexts)
 
-	rows := make([]Row, 0, len(rowConcepts))
+	rows := make([]model.Row, 0, len(rowConcepts))
 	for _, c := range rowConcepts {
 		vals := make([]*float64, len(columns))
 		for i, col := range columns {
 			vals[i] = cellValue(c, col, values, instants)
 		}
-		rows = append(rows, Row{
+		rows = append(rows, model.Row{
 			Label:   c.Label,
 			Concept: c.Name,
 			Type:    classifyRow(c),
@@ -163,14 +73,14 @@ func ProjectTable(role LinkbaseRole, facts []Fact, contexts map[string]Context) 
 		})
 	}
 
-	return &Table{
-		SchemaVersion: schemaVersion,
+	return &model.Table{
+		SchemaVersion: model.SchemaVersion,
 		Title:         role.Title,
 		RoleURI:       role.RoleURI,
 		Columns:       columns,
 		Rows:          rows,
 		Confidence:    computeConfidence(rows, len(columns)),
-		Source:        Source{Extractor: extractorFacts, ParserVersion: parserVersion},
+		Source:        model.Source{Extractor: extractorFacts, ParserVersion: model.ParserVersion},
 	}
 }
 
@@ -186,7 +96,7 @@ const columnCoverageFloor = 0.5
 // at the column's opening or closing date — the convention for cash flow opening
 // and closing balances shown inside a duration column. The opening balance is
 // the instant on the day before the period begins (the prior period's close).
-func cellValue(c RoleConcept, col Column, values map[factKey]float64, instants map[instantKey]float64) *float64 {
+func cellValue(c RoleConcept, col model.Column, values map[factKey]float64, instants map[instantKey]float64) *float64 {
 	switch c.PreferredLabel {
 	case rolePeriodEndLabel:
 		return lookupInstant(instants, c.Name, col.PeriodEnd)
@@ -214,7 +124,7 @@ func lookupInstant(instants map[instantKey]float64, concept string, date time.Ti
 // newest first (by end date, then start date). A primary context becomes a
 // column only if it carries facts for at least columnCoverageFloor of the rows
 // the best-covered context does, which drops periods that only a stray row tags.
-func projectColumns(rowConcepts []RoleConcept, values map[factKey]float64, contexts map[string]Context) []Column {
+func projectColumns(rowConcepts []RoleConcept, values map[factKey]float64, contexts map[string]Context) []model.Column {
 	rowSet := make(map[string]bool, len(rowConcepts))
 	for _, c := range rowConcepts {
 		rowSet[c.Name] = true
@@ -240,10 +150,10 @@ func projectColumns(rowConcepts []RoleConcept, values map[factKey]float64, conte
 		}
 	}
 
-	cols := make([]Column, 0, len(refs))
+	cols := make([]model.Column, 0, len(refs))
 	for _, ref := range refs {
 		ctx := contexts[ref]
-		cols = append(cols, Column{
+		cols = append(cols, model.Column{
 			Label:       columnLabel(ctx),
 			ContextRef:  ref,
 			PeriodStart: ctx.Start,
@@ -271,19 +181,19 @@ func columnLabel(ctx Context) string {
 // "has children" alone misses them); a label beginning with "Total" is a
 // secondary signal. A non-structural parent that is not a total is a subtotal;
 // everything else is a leaf data row.
-func classifyRow(c RoleConcept) RowType {
+func classifyRow(c RoleConcept) model.RowType {
 	if c.PreferredLabel == roleTotalLabel || strings.HasPrefix(strings.ToLower(c.Label), "total") {
-		return RowTotal
+		return model.RowTotal
 	}
 	if c.HasChildren {
-		return RowSubtotal
+		return model.RowSubtotal
 	}
-	return RowData
+	return model.RowData
 }
 
 // computeConfidence buckets trust from two completeness rates: the fraction of
 // cells filled by a fact, and the fraction of rows with every column filled.
-func computeConfidence(rows []Row, nCols int) Confidence {
+func computeConfidence(rows []model.Row, nCols int) model.Confidence {
 	totalCells := len(rows) * nCols
 	resolved := 0
 	fullRows := 0
@@ -309,7 +219,7 @@ func computeConfidence(rows []Row, nCols int) Confidence {
 		rowRate = float64(fullRows) / float64(len(rows))
 	}
 
-	return Confidence{
+	return model.Confidence{
 		Level:             confidenceLevel(rowRate, cellRate),
 		RowMatchRate:      rowRate,
 		CellResolvedRate:  cellRate,

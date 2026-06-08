@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Synthetic Initech 10-K with NO table of contents: section boundaries can only
+     be recovered from the item-shaped <h2> headings, so the partition takes the
+     medium-confidence heading-pattern path. The income statement is missing the
+     FY2023 cost-of-sales cell, dragging the statement to medium as well. This is
+     the corpus's heading-fallback / medium calibration point. -->
+<html xmlns:ix="http://www.xbrl.org/2013/inlineXBRL" xmlns:xbrli="http://www.xbrl.org/2003/instance">
+<body>
+<ix:header><ix:resources>
+  <xbrli:context id="dur-2024">
+    <xbrli:entity><xbrli:identifier scheme="http://www.sec.gov/CIK">0005551234</xbrli:identifier></xbrli:entity>
+    <xbrli:period><xbrli:startDate>2024-01-01</xbrli:startDate><xbrli:endDate>2024-12-31</xbrli:endDate></xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="dur-2023">
+    <xbrli:entity><xbrli:identifier scheme="http://www.sec.gov/CIK">0005551234</xbrli:identifier></xbrli:entity>
+    <xbrli:period><xbrli:startDate>2023-01-01</xbrli:startDate><xbrli:endDate>2023-12-31</xbrli:endDate></xbrli:period>
+  </xbrli:context>
+</ix:resources></ix:header>
+
+<h2>Item 1. Business</h2>
+<p>Initech licenses enterprise middleware to mid-market customers.</p>
+
+<h2>Item 7. Management's Discussion and Analysis</h2>
+<p>Subscription revenue rose while services revenue was flat.</p>
+
+<h2>Item 8. Financial Statements and Supplementary Data</h2>
+<table>
+<tr><td>Revenue</td>
+  <td><ix:nonFraction name="inth:Revenues" contextRef="dur-2024" unitRef="usd" scale="6" id="r24">300</ix:nonFraction></td>
+  <td><ix:nonFraction name="inth:Revenues" contextRef="dur-2023" unitRef="usd" scale="6" id="r23">290</ix:nonFraction></td></tr>
+<tr><td>Cost of sales</td>
+  <td><ix:nonFraction name="inth:CostOfSales" contextRef="dur-2024" unitRef="usd" scale="6" id="c24">180</ix:nonFraction></td>
+  <td></td></tr>
+<tr><td>Net income</td>
+  <td><ix:nonFraction name="inth:NetIncome" contextRef="dur-2024" unitRef="usd" scale="6" id="ni24">70</ix:nonFraction></td>
+  <td><ix:nonFraction name="inth:NetIncome" contextRef="dur-2023" unitRef="usd" scale="6" id="ni23">65</ix:nonFraction></td></tr>
+</table>
+</body>
+</html>

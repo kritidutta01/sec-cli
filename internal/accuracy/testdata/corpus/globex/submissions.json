@@ -1,0 +1,15 @@
+{
+  "cik": "7654321",
+  "name": "Globex Corporation",
+  "tickers": ["GLBX"],
+  "_comment": "Synthetic submissions: one fully fact-tagged FY2024 10-K, the high-confidence corpus entry.",
+  "filings": {
+    "recent": {
+      "accessionNumber": ["0007654321-24-000001"],
+      "filingDate": ["2024-10-15"],
+      "reportDate": ["2024-12-31"],
+      "form": ["10-K"],
+      "primaryDocument": ["globex-10k.htm"]
+    }
+  }
+}

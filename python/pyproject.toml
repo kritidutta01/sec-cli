@@ -1,0 +1,34 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "seccli"
+version = "0.1.0"
+description = "Python wrapper for sec-cli: structured SEC EDGAR filings for LLM consumption"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Kriti Dutta" }]
+keywords = ["sec", "edgar", "xbrl", "filings", "llm"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/kritidutta01/sec-cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/seccli"]
+
+# The matching static sec-cli binary is bundled under seccli/_bin/ at release
+# time (one file per platform wheel). It is not checked into the repo; the
+# wrapper falls back to $SECCLI_BINARY or PATH when no bundled binary is present.
+[tool.hatch.build.targets.wheel.force-include]
+"src/seccli/_bin" = "seccli/_bin"
+
+[tool.hatch.build.targets.sdist]
+include = ["src/seccli", "README.md"]

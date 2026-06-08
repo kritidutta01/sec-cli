@@ -1,0 +1,15 @@
+{
+  "cik": "5551234",
+  "name": "Initech Inc.",
+  "tickers": ["INTH"],
+  "_comment": "Synthetic submissions: a smaller filer whose 10-K has no table of contents (forcing the medium-confidence heading-pattern section path) and one missing statement cell.",
+  "filings": {
+    "recent": {
+      "accessionNumber": ["0005551234-24-000001"],
+      "filingDate": ["2024-09-20"],
+      "reportDate": ["2024-12-31"],
+      "form": ["10-K"],
+      "primaryDocument": ["initech-10k.htm"]
+    }
+  }
+}

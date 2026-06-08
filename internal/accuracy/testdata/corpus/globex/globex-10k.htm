@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Synthetic Globex 10-K: every financial cell is fact-tagged and every cell is
+     present in both periods, so the income statement projects fully (rowRate=1,
+     cellRate=1) and the document scores high confidence. A resolvable TOC drives
+     the high-confidence section path. This is the corpus's "high" calibration
+     point. -->
+<html xmlns:ix="http://www.xbrl.org/2013/inlineXBRL" xmlns:xbrli="http://www.xbrl.org/2003/instance">
+<body>
+<ix:header><ix:resources>
+  <xbrli:context id="dur-2024">
+    <xbrli:entity><xbrli:identifier scheme="http://www.sec.gov/CIK">0007654321</xbrli:identifier></xbrli:entity>
+    <xbrli:period><xbrli:startDate>2024-01-01</xbrli:startDate><xbrli:endDate>2024-12-31</xbrli:endDate></xbrli:period>
+  </xbrli:context>
+  <xbrli:context id="dur-2023">
+    <xbrli:entity><xbrli:identifier scheme="http://www.sec.gov/CIK">0007654321</xbrli:identifier></xbrli:entity>
+    <xbrli:period><xbrli:startDate>2023-01-01</xbrli:startDate><xbrli:endDate>2023-12-31</xbrli:endDate></xbrli:period>
+  </xbrli:context>
+</ix:resources></ix:header>
+
+<table>
+<tr><td><a href="#item1">Item 1. Business</a></td></tr>
+<tr><td><a href="#item1a">Item 1A. Risk Factors</a></td></tr>
+<tr><td><a href="#item8">Item 8. Financial Statements and Supplementary Data</a></td></tr>
+</table>
+
+<h2 id="item1">Item 1. Business</h2>
+<p>Globex Corporation operates a global logistics network.</p>
+
+<h2 id="item1a">Item 1A. Risk Factors</h2>
+<p>Fuel prices and currency movements may affect our margins.</p>
+
+<h2 id="item8">Item 8. Financial Statements and Supplementary Data</h2>
+<table>
+<tr><td>Revenue</td>
+  <td><ix:nonFraction name="glbx:Revenues" contextRef="dur-2024" unitRef="usd" scale="6" id="r24">500</ix:nonFraction></td>
+  <td><ix:nonFraction name="glbx:Revenues" contextRef="dur-2023" unitRef="usd" scale="6" id="r23">460</ix:nonFraction></td></tr>
+<tr><td>Cost of sales</td>
+  <td><ix:nonFraction name="glbx:CostOfSales" contextRef="dur-2024" unitRef="usd" scale="6" id="c24">300</ix:nonFraction></td>
+  <td><ix:nonFraction name="glbx:CostOfSales" contextRef="dur-2023" unitRef="usd" scale="6" id="c23">280</ix:nonFraction></td></tr>
+<tr><td>Net income</td>
+  <td><ix:nonFraction name="glbx:NetIncome" contextRef="dur-2024" unitRef="usd" scale="6" id="ni24">120</ix:nonFraction></td>
+  <td><ix:nonFraction name="glbx:NetIncome" contextRef="dur-2023" unitRef="usd" scale="6" id="ni23">100</ix:nonFraction></td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "_comment": "Hand-verified truth for the Globex FY2024 10-K. Every cell is present and fact-tagged, so the income statement scores high confidence — this is the corpus's high-bucket calibration point.",
+  "ticker": "GLBX",
+  "form": "10-K",
+  "format": "IXBRL",
+  "confidence": "high",
+  "sections": ["1", "1A", "8"],
+  "statements": [
+    {
+      "role": "http://globex.example/role/StatementsOfIncome",
+      "title": "StatementsOfIncome",
+      "cells": [
+        {"concept": "glbx:Revenues", "period": "2024", "value": 500000000},
+        {"concept": "glbx:Revenues", "period": "2023", "value": 460000000},
+        {"concept": "glbx:CostOfSales", "period": "2024", "value": 300000000},
+        {"concept": "glbx:CostOfSales", "period": "2023", "value": 280000000},
+        {"concept": "glbx:NetIncome", "period": "2024", "value": 120000000},
+        {"concept": "glbx:NetIncome", "period": "2023", "value": 100000000}
+      ]
+    }
+  ]
+}
