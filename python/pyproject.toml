@@ -24,11 +24,5 @@ Homepage = "https://github.com/kritidutta01/sec-cli"
 [tool.hatch.build.targets.wheel]
 packages = ["src/seccli"]
 
-# The matching static sec-cli binary is bundled under seccli/_bin/ at release
-# time (one file per platform wheel). It is not checked into the repo; the
-# wrapper falls back to $SECCLI_BINARY or PATH when no bundled binary is present.
-[tool.hatch.build.targets.wheel.force-include]
-"src/seccli/_bin" = "seccli/_bin"
-
 [tool.hatch.build.targets.sdist]
 include = ["src/seccli", "README.md"]
