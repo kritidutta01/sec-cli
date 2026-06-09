@@ -7,6 +7,8 @@ import (
 	"unicode"
 
 	"golang.org/x/net/html"
+
+	"github.com/kritidutta01/sec-cli/internal/model"
 )
 
 // extractorLayout marks tables read by spatial layout rather than the fact
@@ -48,7 +50,7 @@ func (c cellInfo) meaningful() bool {
 // values, which sidesteps the spacer and currency columns that pervade EDGAR
 // markup. (Headers subdivided by colspan into distinct sub-columns are not
 // expanded; that is a known limitation of the layout fallback.)
-func ExtractLayoutTable(table *html.Node) *Table {
+func ExtractLayoutTable(table *html.Node) *model.Table {
 	footnotes := make(map[string]string)
 	rows := dropEmptyRows(readRows(tableRows(table), footnotes))
 
@@ -72,13 +74,13 @@ func ExtractLayoutTable(table *html.Node) *Table {
 		conf.Level = "medium"
 	}
 
-	out := &Table{
-		SchemaVersion: schemaVersion,
+	out := &model.Table{
+		SchemaVersion: model.SchemaVersion,
 		Title:         title,
 		Columns:       columns,
 		Rows:          outRows,
 		Confidence:    conf,
-		Source:        Source{Extractor: extractorLayout, ParserVersion: parserVersion},
+		Source:        model.Source{Extractor: extractorLayout, ParserVersion: model.ParserVersion},
 	}
 	if len(footnotes) > 0 {
 		out.Footnotes = footnotes
@@ -187,7 +189,7 @@ func isHeaderRow(row []cellInfo) bool {
 // with one extra cell carries a label-column header that is dropped; a longer
 // header row is right-aligned (financial tables are right-aligned). Labels from
 // stacked header rows are joined per column.
-func buildColumns(headers [][]cellInfo, nCols int) []Column {
+func buildColumns(headers [][]cellInfo, nCols int) []model.Column {
 	if nCols == 0 {
 		return nil
 	}
@@ -210,9 +212,9 @@ func buildColumns(headers [][]cellInfo, nCols int) []Column {
 			}
 		}
 	}
-	cols := make([]Column, nCols)
+	cols := make([]model.Column, nCols)
 	for i := range cols {
-		cols[i] = Column{Label: strings.Join(labels[i], " ")}
+		cols[i] = model.Column{Label: strings.Join(labels[i], " ")}
 	}
 	return cols
 }
@@ -220,8 +222,8 @@ func buildColumns(headers [][]cellInfo, nCols int) []Column {
 // buildRows turns each data row into a Row: the leading meaningful cell is the
 // label and the rest are normalised numeric values, padded to nCols (a missing
 // trailing cell is null, never zero).
-func buildRows(dataRows [][]cellInfo, nCols int) []Row {
-	var rows []Row
+func buildRows(dataRows [][]cellInfo, nCols int) []model.Row {
+	var rows []model.Row
 	for _, r := range dataRows {
 		cells := meaningfulCells(r)
 		if len(cells) == 0 {
@@ -235,7 +237,7 @@ func buildRows(dataRows [][]cellInfo, nCols int) []Row {
 			}
 			vals[i] = parseLayoutValue(c.text)
 		}
-		rows = append(rows, Row{
+		rows = append(rows, model.Row{
 			Label:  label,
 			Type:   classifyLayoutRow(label, r),
 			Values: vals,
@@ -247,16 +249,16 @@ func buildRows(dataRows [][]cellInfo, nCols int) []Row {
 // classifyLayoutRow types a row from its label and formatting: a "Total" line
 // that is bold or has a top border is a total; an unformatted "Total" line is a
 // subtotal; everything else is data.
-func classifyLayoutRow(label string, row []cellInfo) RowType {
+func classifyLayoutRow(label string, row []cellInfo) model.RowType {
 	if !strings.HasPrefix(strings.ToLower(strings.TrimSpace(label)), "total") {
-		return RowData
+		return model.RowData
 	}
 	for _, c := range row {
 		if c.bold || strings.Contains(strings.ToLower(c.style), "border-top") {
-			return RowTotal
+			return model.RowTotal
 		}
 	}
-	return RowSubtotal
+	return model.RowSubtotal
 }
 
 // parseLayoutValue normalises a displayed figure into a signed float: strips

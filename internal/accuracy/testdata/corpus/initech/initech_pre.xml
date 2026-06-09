@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Presentation linkbase for the Initech income statement. -->
+<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <link:presentationLink xlink:type="extended" xlink:role="http://initech.example/role/StatementsOfIncome">
+    <link:loc xlink:type="locator" xlink:label="loc_IncomeStatementAbstract" xlink:href="initech.xsd#inth_IncomeStatementAbstract"/>
+    <link:loc xlink:type="locator" xlink:label="loc_Revenues" xlink:href="initech.xsd#inth_Revenues"/>
+    <link:loc xlink:type="locator" xlink:label="loc_CostOfSales" xlink:href="initech.xsd#inth_CostOfSales"/>
+    <link:loc xlink:type="locator" xlink:label="loc_NetIncome" xlink:href="initech.xsd#inth_NetIncome"/>
+
+    <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" order="1" preferredLabel="http://www.xbrl.org/2003/role/terseLabel" xlink:from="loc_IncomeStatementAbstract" xlink:to="loc_Revenues"/>
+    <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" order="2" preferredLabel="http://www.xbrl.org/2003/role/terseLabel" xlink:from="loc_IncomeStatementAbstract" xlink:to="loc_CostOfSales"/>
+    <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" order="3" preferredLabel="http://www.xbrl.org/2003/role/totalLabel" xlink:from="loc_IncomeStatementAbstract" xlink:to="loc_NetIncome"/>
+  </link:presentationLink>
+</link:linkbase>

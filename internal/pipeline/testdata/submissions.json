@@ -1,0 +1,30 @@
+{
+  "cik": "1234567",
+  "name": "Acme Corporation",
+  "tickers": ["ACME"],
+  "_comment": "Synthetic submissions for the pipeline test. One 10-K (FY2024) plus an older 10-K to exercise --year, and a PlainHTML-era row is not needed here.",
+  "filings": {
+    "recent": {
+      "accessionNumber": [
+        "0001234567-24-000001",
+        "0001234567-23-000001"
+      ],
+      "filingDate": [
+        "2024-11-01",
+        "2023-11-02"
+      ],
+      "reportDate": [
+        "2024-12-31",
+        "2023-12-31"
+      ],
+      "form": [
+        "10-K",
+        "10-K"
+      ],
+      "primaryDocument": [
+        "acme-10k.htm",
+        "acme-10k-2023.htm"
+      ]
+    }
+  }
+}

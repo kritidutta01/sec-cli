@@ -204,3 +204,77 @@ func (c *Client) FilingForYear(ctx context.Context, cik int64, formType string, 
 	}
 	return Filing{}, &ErrNoFiling{CIK: cik, Form: formType, Year: year}
 }
+
+// ErrNoFilingByAccession is returned by FilingByAccession when no filing in
+// the submissions history matches the requested accession number.
+type ErrNoFilingByAccession struct {
+	CIK       int64
+	Accession string
+}
+
+func (e *ErrNoFilingByAccession) Error() string {
+	return fmt.Sprintf("edgar: no filing with accession %q for CIK %d", e.Accession, e.CIK)
+}
+
+// FilingByAccession returns the filing matching the exact accession number,
+// regardless of form type. Accession comparison is case-insensitive and strips
+// dashes so both "0000320193-24-000123" and "000032019324000123" match.
+func (c *Client) FilingByAccession(ctx context.Context, cik int64, accession string) (Filing, error) {
+	// We fetch all forms by requesting without a form-type filter via Filings
+	// with a synthetic type that won't match, then iterate raw submissions.
+	// Instead, fetch submissions directly and scan all rows.
+	url := fmt.Sprintf(submissionsURLFmt, cik)
+	body, err := c.Get(ctx, url)
+	if err != nil {
+		return Filing{}, fmt.Errorf("edgar: fetch submissions for CIK %d: %w", cik, err)
+	}
+
+	var doc struct {
+		Filings struct {
+			Recent struct {
+				AccessionNumber []string `json:"accessionNumber"`
+				FilingDate      []string `json:"filingDate"`
+				ReportDate      []string `json:"reportDate"`
+				Form            []string `json:"form"`
+				PrimaryDocument []string `json:"primaryDocument"`
+			} `json:"recent"`
+		} `json:"filings"`
+	}
+	if err := json.Unmarshal(body, &doc); err != nil {
+		return Filing{}, fmt.Errorf("edgar: parse submissions for CIK %d: %w", cik, err)
+	}
+
+	needle := normalizeAccession(accession)
+	r := doc.Filings.Recent
+	for i, acc := range r.AccessionNumber {
+		if normalizeAccession(acc) == needle {
+			filed, _ := time.Parse(edgarDateLayout, r.FilingDate[i])
+			var reported time.Time
+			if i < len(r.ReportDate) && r.ReportDate[i] != "" {
+				reported, _ = time.Parse(edgarDateLayout, r.ReportDate[i])
+			}
+			form := ""
+			if i < len(r.Form) {
+				form = r.Form[i]
+			}
+			primary := ""
+			if i < len(r.PrimaryDocument) {
+				primary = r.PrimaryDocument[i]
+			}
+			return Filing{
+				AccessionNumber: acc,
+				FilingDate:      filed,
+				ReportDate:      reported,
+				Form:            form,
+				PrimaryDocument: primary,
+			}, nil
+		}
+	}
+	return Filing{}, &ErrNoFilingByAccession{CIK: cik, Accession: accession}
+}
+
+// normalizeAccession strips dashes and lowercases an accession number so
+// "0000320193-24-000123" and "000032019324000123" compare equal.
+func normalizeAccession(s string) string {
+	return strings.ToLower(strings.ReplaceAll(s, "-", ""))
+}

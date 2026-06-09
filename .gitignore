@@ -21,6 +21,15 @@
 # Go module cache
 vendor/
 
+# Python (seccli wrapper)
+__pycache__/
+*.py[cod]
+python/dist/
+python/build/
+python/*.egg-info/
+# Binary bundled into the wheel at release time, never committed
+python/src/seccli/_bin/
+
 # IDE
 .idea/
 .vscode/

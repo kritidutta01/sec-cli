@@ -1,0 +1,15 @@
+{
+  "cik": "9990001",
+  "name": "Umbrella Corporation",
+  "tickers": ["UMBR"],
+  "_comment": "Synthetic submissions: a mixed filing whose income statement is fact-tagged but whose selected-financial-data table is plain HTML, so the router classifies it PartialIXBRL.",
+  "filings": {
+    "recent": {
+      "accessionNumber": ["0009990001-24-000001"],
+      "filingDate": ["2024-08-30"],
+      "reportDate": ["2024-12-31"],
+      "form": ["10-K"],
+      "primaryDocument": ["umbrella-10k.htm"]
+    }
+  }
+}

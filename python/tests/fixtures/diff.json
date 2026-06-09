@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0.0",
+  "prev": {
+    "company": "Acme Corp",
+    "ticker": "ACME",
+    "form": "10-K",
+    "accession": "0000000000-23-000001",
+    "filing_date": "2023-11-01",
+    "period_end": "2023-12-31"
+  },
+  "curr": {
+    "company": "Acme Corp",
+    "ticker": "ACME",
+    "form": "10-K",
+    "accession": "0000000000-24-000001",
+    "filing_date": "2024-11-01",
+    "period_end": "2024-12-31"
+  },
+  "statements": [
+    {
+      "title": "Income Statement",
+      "role_uri": "http://acme.com/role/Income",
+      "periods": ["FY2023"],
+      "rows": [
+        {
+          "concept": "us-gaap:Revenues",
+          "label": "Total revenue",
+          "status": "changed",
+          "cells": [
+            {"period": "FY2023", "prev": 900, "curr": 1000, "abs": 100, "pct": 11.11111111111111}
+          ]
+        },
+        {
+          "concept": "us-gaap:CostOfRevenue",
+          "label": "Cost of sales",
+          "status": "unchanged",
+          "cells": [
+            {"period": "FY2023", "prev": 400, "curr": 400, "abs": 0, "pct": 0}
+          ]
+        },
+        {
+          "concept": "us-gaap:MarketingExpense",
+          "label": "Marketing",
+          "status": "changed",
+          "cells": [
+            {"period": "FY2023", "prev": 0, "curr": 25, "abs": 25, "pct": null}
+          ]
+        },
+        {
+          "concept": "us-gaap:NewSegmentRevenue",
+          "label": "New segment",
+          "status": "added",
+          "cells": [
+            {"period": "FY2023", "prev": null, "curr": 75, "abs": null, "pct": null}
+          ]
+        },
+        {
+          "concept": "us-gaap:LegacyFee",
+          "label": "Legacy fee",
+          "status": "removed",
+          "cells": [
+            {"period": "FY2023", "prev": 50, "curr": null, "abs": null, "pct": null}
+          ]
+        }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "item": "1A",
+      "title": "Risk Factors",
+      "paragraphs": [
+        {"kind": "removed", "text": "We depend on a legacy product line."},
+        {"kind": "added", "text": "New regulation may raise our costs."}
+      ]
+    }
+  ]
+}

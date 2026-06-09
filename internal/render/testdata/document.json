@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "company": "Acme Corp",
+    "ticker": "ACME",
+    "form": "10-K",
+    "accession": "0000000000-24-000001",
+    "filing_date": "2024-11-01",
+    "period_end": "2024-12-31",
+    "schema_version": "1.0.0",
+    "parser_version": "0.1.0",
+    "source": {
+      "extractor": "ixbrl.facts",
+      "parser_version": "0.1.0"
+    },
+    "confidence": {
+      "level": "high",
+      "row_match_rate": 1,
+      "cell_resolved_rate": 1,
+      "untagged_cell_count": 0
+    }
+  },
+  "sections": [
+    {
+      "item": "1A",
+      "title": "Risk Factors",
+      "kind": "narrative",
+      "text": "Our results are subject to risks.\n\nMarkets fluctuate."
+    }
+  ],
+  "statements": [
+    {
+      "schema_version": "1.0.0",
+      "title": "Income Statement",
+      "columns": [
+        {
+          "label": "2024"
+        },
+        {
+          "label": "2023"
+        }
+      ],
+      "rows": [
+        {
+          "label": "Revenue",
+          "concept": "us-gaap:Revenues",
+          "type": "data",
+          "values": [
+            1000,
+            900
+          ]
+        },
+        {
+          "label": "Research & development",
+          "type": "data",
+          "values": [
+            200,
+            null
+          ]
+        },
+        {
+          "label": "Net income",
+          "type": "total",
+          "values": [
+            300,
+            250
+          ]
+        }
+      ],
+      "confidence": {
+        "level": "medium",
+        "row_match_rate": 0.67,
+        "cell_resolved_rate": 0.83,
+        "untagged_cell_count": 1
+      },
+      "source": {
+        "extractor": "ixbrl.facts",
+        "parser_version": "0.1.0"
+      }
+    }
+  ]
+}

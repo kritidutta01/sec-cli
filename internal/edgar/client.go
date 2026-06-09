@@ -54,11 +54,22 @@ type Client struct {
 	tickerCIK map[string]int64
 }
 
+// Option configures a Client at construction. Options exist mainly so tests can
+// inject a fake transport; production callers use NewClient() with no options.
+type Option func(*Client)
+
+// WithHTTPClient sets the underlying *http.Client. It is the seam hermetic tests
+// use to inject a fake http.RoundTripper (see internal/edgar/client_test.go),
+// keeping the Client a pure HTTP client with no knowledge of test plumbing.
+func WithHTTPClient(h *http.Client) Option {
+	return func(c *Client) { c.http = h }
+}
+
 // NewClient reads SEC_CLI_USER_AGENT from the environment and returns a Client.
 // EDGAR's Fair Access policy requires every request identify the caller; a
 // missing or empty env var returns an error here instead of letting EDGAR
-// answer 403 on the wire.
-func NewClient() (*Client, error) {
+// answer 403 on the wire. Options override defaults (e.g. WithHTTPClient for tests).
+func NewClient(opts ...Option) (*Client, error) {
 	ua := os.Getenv(userAgentEnv)
 	if ua == "" {
 		return nil, fmt.Errorf(
@@ -66,11 +77,15 @@ func NewClient() (*Client, error) {
 			userAgentEnv, fairAccessURL,
 		)
 	}
-	return &Client{
+	c := &Client{
 		http:      &http.Client{Timeout: defaultHTTPTimeout},
 		limiter:   rate.NewLimiter(rate.Limit(rateLimitPerSec), rateBurst),
 		userAgent: ua,
-	}, nil
+	}
+	for _, o := range opts {
+		o(c)
+	}
+	return c, nil
 }
 
 // Get fetches url and returns the response body. It blocks on the shared rate

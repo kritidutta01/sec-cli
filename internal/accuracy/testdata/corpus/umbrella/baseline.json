@@ -1,0 +1,22 @@
+{
+  "_comment": "Hand-verified truth for the Umbrella FY2024 10-K, a PartialIXBRL filing: the Item 6 selected-data table is plain HTML, but the Item 8 income statement is fully fact-tagged and projects to high confidence. Sections come from the TOC (high).",
+  "ticker": "UMBR",
+  "form": "10-K",
+  "format": "PartialIXBRL",
+  "confidence": "high",
+  "sections": ["1", "6", "8"],
+  "statements": [
+    {
+      "role": "http://umbrella.example/role/StatementsOfIncome",
+      "title": "StatementsOfIncome",
+      "cells": [
+        {"concept": "umbr:Revenues", "period": "2024", "value": 820000000},
+        {"concept": "umbr:Revenues", "period": "2023", "value": 780000000},
+        {"concept": "umbr:CostOfSales", "period": "2024", "value": 500000000},
+        {"concept": "umbr:CostOfSales", "period": "2023", "value": 470000000},
+        {"concept": "umbr:NetIncome", "period": "2024", "value": 150000000},
+        {"concept": "umbr:NetIncome", "period": "2023", "value": 140000000}
+      ]
+    }
+  ]
+}
