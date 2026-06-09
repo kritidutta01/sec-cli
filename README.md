@@ -2,7 +2,7 @@
 
 Extract structured data from SEC EDGAR filings for LLM consumption.
 
-> **Status: v1.0 — all 14 phases complete.** `sec-cli get`, `sec-cli diff`, and the full parser pipeline (iXBRL fact stream, presentation linkbase, section extraction, three-layer diff, SQLite cache) are implemented and tested. See [Roadmap](#roadmap).
+> **Status: v1.0, all 14 phases complete.** `sec-cli get`, `sec-cli diff`, and the full parser pipeline (iXBRL fact stream, presentation linkbase, section extraction, three-layer diff, SQLite cache) are implemented and tested. See [Roadmap](#roadmap).
 
 ---
 
@@ -29,14 +29,14 @@ sec-cli diff NVDA --from 2023 --to 2024 --output md
 
 ## What it does
 
-sec-cli is a fast CLI (and importable Go library) that turns SEC EDGAR filings into clean, structured output you can pipe directly into a language model or analysis pipeline — no API key, no paid service, no runtime dependencies.
+sec-cli is a fast CLI (and importable Go library) that turns SEC EDGAR filings into clean, structured output you can pipe directly into a language model or analysis pipeline, no API key, no paid service, no runtime dependencies.
 
 - **Fetches** any 10-K, 10-Q, or 8-K by ticker + year with no API key required
-- **Detects** filing format (iXBRL, PartialIXBRL, PlainHTML, PlainText) and refuses non-iXBRL filings cleanly with a v1.1 pointer — never silently parses bad data
-- **Extracts** financial tables using the iXBRL fact stream + presentation linkbase as the authoritative source — the same data FactSet and Bloomberg read, not HTML table walking
-- **Extracts** free-text sections (Risk Factors, MD&A, Business Overview, 8-K items) using distribution-relative heading detection — structure derived from each document's own inline CSS, not fixed font-size thresholds
+- **Detects** filing format (iXBRL, PartialIXBRL, PlainHTML, PlainText) and refuses non-iXBRL filings cleanly with a v1.1 pointer, never silently parses bad data
+- **Extracts** financial tables using the iXBRL fact stream + presentation linkbase as the authoritative source, the same data FactSet and Bloomberg read, not HTML table walking
+- **Extracts** free-text sections (Risk Factors, MD&A, Business Overview, 8-K items) using distribution-relative heading detection, structure derived from each document's own inline CSS, not fixed font-size thresholds
 - **Outputs** versioned, schema-stable JSON or Markdown with a calibrated confidence signal per table (`schema_version: "1.0.0"`)
-- **Diffs** two years of the same filing at structural, lexical, or semantic granularity to surface what substantively changed — not every comma rephrasing
+- **Diffs** two years of the same filing at structural, lexical, or semantic granularity to surface what substantively changed, not every comma rephrasing
 
 **v1.0 supports iXBRL-era filings only** (2019+ for large accelerated filers, 2021+ for all filers). Pre-iXBRL filings are detected and refused with a clear error and a v1.1 pointer, never parsed badly.
 
@@ -84,7 +84,7 @@ make lint        # staticcheck + go vet
 
 ## Commands
 
-### `get` — fetch, parse, and render a filing
+### `get`, fetch, parse, and render a filing
 
 ```bash
 sec-cli get AAPL                                   # latest 10-K, JSON
@@ -104,7 +104,7 @@ Every JSON response carries `schema_version: "1.0.0"`. Every Markdown/text respo
 
 ---
 
-### `diff` — compare two filings year-over-year
+### `diff`, compare two filings year-over-year
 
 ```bash
 sec-cli diff AAPL --from 2022 --to 2024                   # structural diff, JSON
@@ -121,15 +121,15 @@ Three diff layers:
 |---|---|---|
 | `structural` (default) | Subsection-grain: added / removed / modified / unchanged | ✅ |
 | `lexical` | Word-level diffs within modified paragraphs, annotated `[+..+]` / `[-..-]` | ✅ |
-| `semantic` | Embedding-distance ranking of modified paragraphs — surfaces substantive change, filters year-roll noise | planned v1.0.1 |
+| `semantic` | Embedding-distance ranking of modified paragraphs, surfaces substantive change, filters year-roll noise | planned v1.0.1 |
 
 Financial tables diff by aligning rows on GAAP concept (`us-gaap:Revenues` matches whether labeled "Net revenues" or "Net sales") and columns by period. Concept-based alignment is free from the iXBRL fact-stream path.
 
-Both endpoints must be iXBRL filings — diffs that span the iXBRL boundary fail fast on the pre-iXBRL side, before the iXBRL filing is fetched.
+Both endpoints must be iXBRL filings, diffs that span the iXBRL boundary fail fast on the pre-iXBRL side, before the iXBRL filing is fetched.
 
 ---
 
-### `sections` — list detected item sections
+### `sections`, list detected item sections
 
 ```bash
 sec-cli sections AAPL
@@ -143,7 +143,7 @@ Lists all detected Item sections with resolved titles. Useful to know what `--se
 
 ---
 
-### `accuracy` — run the extraction harness
+### `accuracy`, run the extraction harness
 
 ```bash
 sec-cli accuracy internal/accuracy/testdata/corpus
@@ -151,7 +151,7 @@ sec-cli accuracy internal/accuracy/testdata/corpus
 make accuracy
 ```
 
-Scores the pipeline against a corpus of hand-verified filings. Reports statement cell accuracy and section coverage per filing, split by confidence bucket. All fixtures are hermetic — no network calls.
+Scores the pipeline against a corpus of hand-verified filings. Reports statement cell accuracy and section coverage per filing, split by confidence bucket. All fixtures are hermetic, no network calls.
 
 Current corpus results (synthetic fixtures):
 
@@ -168,11 +168,11 @@ overall: statement accuracy 100.0% (32/32), section coverage 100.0% (13/13)
 confidence calibration: high 100.0% · medium 100.0%
 ```
 
-The current corpus uses synthetic hermetic fixtures. Real-filing corpus expansion (AAPL, MSFT, JPM) is planned for v1.0.1 — those numbers will be the honest headline once that corpus is in.
+The current corpus uses synthetic hermetic fixtures. Real-filing corpus expansion (AAPL, MSFT, JPM) is planned for v1.0.1, those numbers will be the honest headline once that corpus is in.
 
 ---
 
-### `cache` — inspect or clear the local SQLite cache
+### `cache`, inspect or clear the local SQLite cache
 
 ```bash
 sec-cli cache stats         # show size and entry counts
@@ -184,8 +184,8 @@ Cache lives at `$XDG_CACHE_HOME/sec-cli/cache.db` (or `~/.cache/sec-cli/cache.db
 
 | Tier | Key | Invalidation |
 |---|---|---|
-| Raw | `(cik, accession)` | Never — EDGAR filings are immutable; amendments get new accession numbers |
-| Parsed | `(accession, parser_version, schema_version)` | Automatic when either version bumps — raw bytes are reused, no re-fetch |
+| Raw | `(cik, accession)` | Never, EDGAR filings are immutable; amendments get new accession numbers |
+| Parsed | `(accession, parser_version, schema_version)` | Automatic when either version bumps, raw bytes are reused, no re-fetch |
 
 ---
 
@@ -208,7 +208,7 @@ sec-cli text AAPL --year 2024 --section "Risk Factors"
 
 ## Tests
 
-The suite is hermetic — recorded fixtures and a fake `http.RoundTripper` mean no network calls and no `SEC_CLI_USER_AGENT` needed:
+The suite is hermetic, recorded fixtures and a fake `http.RoundTripper` mean no network calls and no `SEC_CLI_USER_AGENT` needed:
 
 ```bash
 go test ./...                            # all packages
@@ -224,7 +224,7 @@ go test ./internal/cache/... -v          # cache + schema-version migration
 
 ## Python wrapper
 
-A thin Python wrapper (`pip install seccli`) drives the binary via subprocess and deserializes canonical JSON into typed dataclasses. The JSON schema is the only contract — the Go and Python views never diverge.
+A thin Python wrapper (`pip install seccli`) drives the binary via subprocess and deserializes canonical JSON into typed dataclasses. The JSON schema is the only contract, the Go and Python views never diverge.
 
 ```python
 import seccli
@@ -271,9 +271,9 @@ CLI (cmd/)
   └─ edgar client       rate-limited (9 req/sec), User-Agent enforced
       └─ format router  classifies IXBRL / PartialIXBRL / PlainHTML / PlainText / Unknown
           └─ iXBRL parser
-              ├─ fact-stream extractor   PRIMARY — financial statements
+              ├─ fact-stream extractor   PRIMARY, financial statements
               │   fact stream + presentation linkbase → rows × columns × periods
-              ├─ layout extractor        FALLBACK — untagged narrative tables
+              ├─ layout extractor        FALLBACK, untagged narrative tables
               │   5-phase HTML pipeline → rows × columns (lower accuracy ceiling)
               └─ section extractor       10-K/10-Q item patterns + 8-K dotted items
                   └─ normalized model    Document → Metadata, []Section, []Table
@@ -300,8 +300,8 @@ Pre-iXBRL paths (PlainHTML, PlainText) are detected and refused in v1.0. The lay
 | 8 | Section extraction: 10-K + 8-K item pattern tables | ✅ Done |
 | 9 | Normalized model + JSON / Markdown / text output | ✅ Done |
 | 10 | SQLite cache (two-tier, schema-version keyed) | ✅ Done |
-| 11 | `get` command — fetch → parse → render pipeline | ✅ Done |
-| 12 | `diff` command — structural + lexical layers; semantic stub | ✅ Done |
+| 11 | `get` command, fetch → parse → render pipeline | ✅ Done |
+| 12 | `diff` command, structural + lexical layers; semantic stub | ✅ Done |
 | 13 | Accuracy harness + hermetic corpus | ✅ Done |
 | 14 | Python wrapper & Homebrew distribution template | ✅ Done |
 
