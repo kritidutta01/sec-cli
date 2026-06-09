@@ -6,6 +6,27 @@ Extract structured data from SEC EDGAR filings for LLM consumption.
 
 ---
 
+## Demo
+
+<!-- ASCIINEMA: replace the line below with your embed once recorded
+     Record with:
+       asciinema rec sec-cli-demo.cast
+     Then upload:
+       asciinema upload sec-cli-demo.cast
+     Then replace this block with:
+       [![asciicast](https://asciinema.org/a/REPLACE_WITH_ID.svg)](https://asciinema.org/a/REPLACE_WITH_ID)
+-->
+
+```bash
+# Fetch Apple's latest 10-K Risk Factors as clean Markdown
+sec-cli get AAPL --section "Risk Factors" --output md | head -40
+
+# Year-over-year diff of Nvidia's 10-K (2023 → 2024)
+sec-cli diff NVDA --from 2023 --to 2024 --output md
+```
+
+---
+
 ## What it does
 
 sec-cli is a fast CLI (and importable Go library) that turns SEC EDGAR filings into clean, structured output you can pipe directly into a language model or analysis pipeline — no API key, no paid service, no runtime dependencies.
@@ -291,4 +312,4 @@ Pre-iXBRL paths (PlainHTML, PlainText) are detected and refused in v1.0. The lay
 
 ## License
 
-TBD.
+[MIT](LICENSE)
