@@ -169,7 +169,7 @@ func writeStatementMarkdown(b *strings.Builder, s StatementDiff) {
 		fmt.Fprintf(b, "### %s — %s\n\n", mdCell(title), mdCell(period))
 		b.WriteString("| Line | Previous | Current | Δ | Δ% |\n")
 		b.WriteString("| --- | ---: | ---: | ---: | ---: |\n")
-		any := false
+		hasRows := false
 		for _, r := range s.Rows {
 			if r.Status == Unchanged {
 				continue
@@ -184,9 +184,9 @@ func writeStatementMarkdown(b *strings.Builder, s StatementDiff) {
 				formatValue(c.Curr),
 				formatSigned(c.Abs),
 				formatPercent(c.Pct))
-			any = true
+			hasRows = true
 		}
-		if !any {
+		if !hasRows {
 			b.WriteString("| _no changes_ |  |  |  |  |\n")
 		}
 		b.WriteByte('\n')

@@ -59,7 +59,7 @@ func diffCmd() *cobra.Command {
 				return fmt.Errorf("to %d: %w", to, err)
 			}
 
-			cs, lexical, err := diff.DiffWithLayer(prev, curr, diffLayer)
+			cs, lexical, err := diff.WithLayer(prev, curr, diffLayer)
 			if err != nil {
 				if errors.Is(err, diff.ErrSemanticNotImplemented) {
 					fmt.Fprintln(os.Stderr, err.Error())

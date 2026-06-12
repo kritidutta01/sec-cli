@@ -9,6 +9,6 @@ import "errors"
 // layer shows exactly how. The semantic ranking layer (which paragraphs changed
 // the most in meaning, noise-filtered) is a planned follow-up.
 var ErrSemanticNotImplemented = errors.New(
-	"sec-cli: --layer semantic is not yet implemented; use --layer structural (default) or --layer lexical. " +
-		"Semantic embedding-distance ranking is planned for v1.0.1.",
+	"sec-cli: --layer semantic is not yet implemented; use --layer structural (default) or --layer lexical" +
+		" — semantic embedding-distance ranking is planned for v1.0.1",
 )

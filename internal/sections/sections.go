@@ -464,10 +464,10 @@ var eightKItemByKey = func() map[string]itemSpec {
 }()
 
 var (
-	itemPrefixRe    = regexp.MustCompile(`(?i)^item\s+(\d{1,2})\s*([a-c])?\b`)
-	itemAnyRe       = regexp.MustCompile(`(?i)\bitem\s+(\d{1,2})\s*([a-c])?\b`)
-	eightKPrefixRe  = regexp.MustCompile(`(?i)^item\s+(\d+\.\d+)\b`)
-	eightKAnyRe     = regexp.MustCompile(`(?i)\bitem\s+(\d+\.\d+)\b`)
+	itemPrefixRe   = regexp.MustCompile(`(?i)^item\s+(\d{1,2})\s*([a-c])?\b`)
+	itemAnyRe      = regexp.MustCompile(`(?i)\bitem\s+(\d{1,2})\s*([a-c])?\b`)
+	eightKPrefixRe = regexp.MustCompile(`(?i)^item\s+(\d+\.\d+)\b`)
+	eightKAnyRe    = regexp.MustCompile(`(?i)\bitem\s+(\d+\.\d+)\b`)
 )
 
 // classifyItem maps heading or TOC text to a canonical item. It first reads an

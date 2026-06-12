@@ -7,11 +7,11 @@ import (
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
-// DiffLexical returns a human-readable word-level diff between two paragraph
+// Lexical returns a human-readable word-level diff between two paragraph
 // texts. Equal spans are shown in-line; insertions are wrapped in [+...+] and
 // deletions in [-...-]. The result is suitable for the --layer lexical view
 // where an analyst wants to compare specific wording changes.
-func DiffLexical(prev, curr string) string {
+func Lexical(prev, curr string) string {
 	dmp := diffmatchpatch.New()
 	wPrev, wCurr, lines := dmp.DiffLinesToChars(prev, curr)
 	diffs := dmp.DiffMain(wPrev, wCurr, false)
@@ -52,7 +52,7 @@ type LexicalParagraph struct {
 // paragraph are included.
 func DiffLexicalSections(cs *ChangeSet, prev, curr []string) []LexicalSectionDiff {
 	// Build prev/curr paragraph maps by item id.
-	type sectionText struct{ item, title, text string }
+	type sectionText struct{ item, title string }
 	prevByItem := make(map[string]sectionText, len(prev))
 	currByItem := make(map[string]sectionText, len(curr))
 
@@ -108,7 +108,7 @@ func DiffLexicalSections(cs *ChangeSet, prev, curr []string) []LexicalSectionDif
 				c = added[i]
 			}
 			lsd.Paragraphs = append(lsd.Paragraphs, LexicalParagraph{
-				Text: DiffLexical(p, c),
+				Text: Lexical(p, c),
 			})
 		}
 		out = append(out, lsd)

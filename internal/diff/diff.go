@@ -24,10 +24,10 @@ const (
 	LayerLexical    Layer = "lexical"    // word-level diff via diffmatchpatch
 )
 
-// DiffWithLayer runs a structural diff and, for the lexical layer, annotates
+// WithLayer runs a structural diff and, for the lexical layer, annotates
 // modified paragraphs with word-level diffs. The semantic layer returns
 // ErrSemanticNotImplemented.
-func DiffWithLayer(prev, curr *model.Document, layer Layer) (*ChangeSet, []LexicalSectionDiff, error) {
+func WithLayer(prev, curr *model.Document, layer Layer) (*ChangeSet, []LexicalSectionDiff, error) {
 	if layer == LayerSemantic {
 		return nil, nil, ErrSemanticNotImplemented
 	}
