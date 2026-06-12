@@ -175,12 +175,11 @@ The current corpus uses synthetic hermetic fixtures. Real-filing corpus expansio
 ### `cache`, inspect or clear the local SQLite cache
 
 ```bash
-sec-cli cache stats         # show size and entry counts
-sec-cli cache clear         # delete cached parsed documents
-sec-cli cache clear --raw   # also delete raw bytes (forces re-fetch from EDGAR)
+sec-cli cache path          # print the cache file location
+sec-cli cache clear         # delete all cached raw bytes and parsed documents
 ```
 
-Cache lives at `$XDG_CACHE_HOME/sec-cli/cache.db` (or `~/.cache/sec-cli/cache.db`). Two-tier design:
+Cache lives at `%LOCALAPPDATA%\sec-cli\cache.db` on Windows or `~/.cache/sec-cli/cache.db` on Linux/macOS. Two-tier design:
 
 | Tier | Key | Invalidation |
 |---|---|---|

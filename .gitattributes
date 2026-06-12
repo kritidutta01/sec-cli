@@ -1,0 +1,9 @@
+# Force LF line endings for all text files so golden tests pass on Windows.
+* text=auto eol=lf
+
+# Binaries — no conversion.
+*.exe binary
+*.dll binary
+*.so  binary
+*.png binary
+*.jpg binary
