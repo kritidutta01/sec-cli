@@ -36,7 +36,7 @@ func WithLayer(prev, curr *model.Document, layer Layer) (*ChangeSet, []LexicalSe
 		return nil, nil, err
 	}
 	if layer == LayerLexical {
-		return cs, DiffLexicalSections(cs, nil, nil), nil
+		return cs, LexicalSections(cs, nil, nil), nil
 	}
 	return cs, nil, nil
 }

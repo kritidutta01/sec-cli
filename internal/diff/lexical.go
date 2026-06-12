@@ -46,11 +46,11 @@ type LexicalParagraph struct {
 	Text string `json:"text"`
 }
 
-// DiffLexicalSections produces a word-level diff for the modified sections from
+// LexicalSections produces a word-level diff for the modified sections from
 // a structural ChangeSet. Added/removed sections are omitted (their full text
 // appears in the structural report); only sections with at least one changed
 // paragraph are included.
-func DiffLexicalSections(cs *ChangeSet, prev, curr []string) []LexicalSectionDiff {
+func LexicalSections(cs *ChangeSet, prev, curr []string) []LexicalSectionDiff {
 	// Build prev/curr paragraph maps by item id.
 	type sectionText struct{ item, title string }
 	prevByItem := make(map[string]sectionText, len(prev))
