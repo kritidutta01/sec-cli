@@ -8,14 +8,7 @@ Extract structured data from SEC EDGAR filings for LLM consumption.
 
 ## Demo
 
-<!-- ASCIINEMA: replace the line below with your embed once recorded
-     Record with:
-       asciinema rec sec-cli-demo.cast
-     Then upload:
-       asciinema upload sec-cli-demo.cast
-     Then replace this block with:
-       [![asciicast](https://asciinema.org/a/REPLACE_WITH_ID.svg)](https://asciinema.org/a/REPLACE_WITH_ID)
--->
+![sec-cli demo](demo.gif)
 
 ```bash
 # Fetch Apple's latest 10-K Risk Factors as clean Markdown
