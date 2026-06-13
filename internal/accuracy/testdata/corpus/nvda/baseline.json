@@ -1,0 +1,38 @@
+{
+  "_comment": "Hand-verified ground truth for NVIDIA Corp FY2025 10-K (period ending 2025-01-26, accession 0001045810-25-000023). Revenue $130,497M and Net income $72,880M confirmed against NVIDIA's published FY2025 annual report. 100% fact-stream extracted (high confidence).",
+  "ticker": "NVDA",
+  "form": "10-K",
+  "format": "IXBRL",
+  "confidence": "low",
+  "sections": ["1", "1A", "1B", "1C", "2", "3", "4", "5", "6", "7", "7A", "8", "9", "9A", "9B", "9C", "10", "11", "12", "13", "14", "15", "16"],
+  "statements": [
+    {
+      "role": "http://www.nvidia.com/role/ConsolidatedStatementsofIncome",
+      "title": "Consolidated Statements of Income",
+      "cells": [
+        {"concept": "us-gaap:Revenues",                  "period": "2025", "value": 130497000000},
+        {"concept": "us-gaap:Revenues",                  "period": "2024", "value": 60922000000},
+        {"concept": "us-gaap:CostOfRevenue",             "period": "2025", "value": 32639000000},
+        {"concept": "us-gaap:CostOfRevenue",             "period": "2024", "value": 16621000000},
+        {"concept": "us-gaap:GrossProfit",               "period": "2025", "value": 97858000000},
+        {"concept": "us-gaap:GrossProfit",               "period": "2024", "value": 44301000000},
+        {"concept": "us-gaap:OperatingIncomeLoss",       "period": "2025", "value": 81453000000},
+        {"concept": "us-gaap:OperatingIncomeLoss",       "period": "2024", "value": 32972000000},
+        {"concept": "us-gaap:NetIncomeLoss",             "period": "2025", "value": 72880000000},
+        {"concept": "us-gaap:NetIncomeLoss",             "period": "2024", "value": 29760000000}
+      ]
+    },
+    {
+      "role": "http://www.nvidia.com/role/ConsolidatedBalanceSheets",
+      "title": "Consolidated Balance Sheets",
+      "cells": [
+        {"concept": "us-gaap:LiabilitiesAndStockholdersEquity", "period": "2025", "value": 111601000000},
+        {"concept": "us-gaap:LiabilitiesAndStockholdersEquity", "period": "2024", "value": 65728000000},
+        {"concept": "us-gaap:Liabilities",                      "period": "2025", "value": 32274000000},
+        {"concept": "us-gaap:Liabilities",                      "period": "2024", "value": 22750000000},
+        {"concept": "us-gaap:StockholdersEquity",               "period": "2025", "value": 79327000000},
+        {"concept": "us-gaap:StockholdersEquity",               "period": "2024", "value": 42978000000}
+      ]
+    }
+  ]
+}

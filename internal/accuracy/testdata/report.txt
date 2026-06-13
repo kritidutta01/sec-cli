@@ -1,12 +1,16 @@
 filing     ticker  format         exp   →got      stmt-acc   sect-cov
 ----------------------------------------------------------------------------
+aapl       AAPL    IXBRL          low   →low        100.0%     100.0%
 acme       ACME    IXBRL          medium→medium     100.0%     100.0%
 globex     GLBX    IXBRL          high  →high       100.0%     100.0%
 initech    INTH    IXBRL          medium→medium     100.0%     100.0%
+jpm        JPM     IXBRL          low   →low        100.0%     100.0%
+nvda       NVDA    IXBRL          low   →low        100.0%     100.0%
 umbrella   UMBR    PartialIXBRL   high  →high       100.0%     100.0%
 ----------------------------------------------------------------------------
-overall: statement accuracy 100.0% (32/32), section coverage 100.0% (13/13)
+overall: statement accuracy 100.0% (76/76), section coverage 100.0% (81/81)
 
 confidence calibration (accuracy within each bucket):
   high   2 filing(s): 100.0% cell accuracy
   medium 2 filing(s): 100.0% cell accuracy
+  low    3 filing(s): 100.0% cell accuracy

@@ -1,0 +1,14 @@
+{
+  "cik": "19617",
+  "name": "JPMorgan Chase & Co.",
+  "tickers": ["JPM"],
+  "filings": {
+    "recent": {
+      "accessionNumber": ["0001628280-26-008131"],
+      "filingDate":      ["2026-02-13"],
+      "reportDate":      ["2025-12-31"],
+      "form":            ["10-K"],
+      "primaryDocument": ["jpm-20251231.htm"]
+    }
+  }
+}

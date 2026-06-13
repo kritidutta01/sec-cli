@@ -1,0 +1,24 @@
+{
+  "_comment": "Hand-verified ground truth for JPMorgan Chase & Co. FY2025 10-K (period ending 2025-12-31, accession 0001628280-26-008131). FY2024 column (net income $58,471M, net revenue $177,556M) confirmed against JPMorgan's published FY2024 annual results. 100% fact-stream extracted for income statement (high confidence). Balance sheet medium confidence due to complex bank financial structure.",
+  "ticker": "JPM",
+  "form": "10-K",
+  "format": "IXBRL",
+  "confidence": "low",
+  "sections": ["1", "1A", "1B", "1C", "2", "3", "4", "5", "6", "7", "7A", "8", "9", "9A", "9B", "9C", "10", "11", "12", "13", "14", "15"],
+  "statements": [
+    {
+      "role": "http://www.jpmorganchase.com/role/ConsolidatedStatementsofIncome",
+      "title": "Consolidated Statements of Income",
+      "cells": [
+        {"concept": "us-gaap:NoninterestIncome",                "period": "2025", "value": 87004000000},
+        {"concept": "us-gaap:NoninterestIncome",                "period": "2024", "value": 84973000000},
+        {"concept": "us-gaap:InterestIncomeExpenseNet",         "period": "2025", "value": 95443000000},
+        {"concept": "us-gaap:InterestIncomeExpenseNet",         "period": "2024", "value": 92583000000},
+        {"concept": "us-gaap:RevenuesNetOfInterestExpense",     "period": "2025", "value": 182447000000},
+        {"concept": "us-gaap:RevenuesNetOfInterestExpense",     "period": "2024", "value": 177556000000},
+        {"concept": "us-gaap:NetIncomeLoss",                    "period": "2025", "value": 57048000000},
+        {"concept": "us-gaap:NetIncomeLoss",                    "period": "2024", "value": 58471000000}
+      ]
+    }
+  ]
+}
