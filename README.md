@@ -8,7 +8,7 @@ Extract structured data from SEC EDGAR filings for LLM consumption.
 
 ## Demo
 
-[![asciicast](https://asciinema.org/a/ZPrwdFfGhMC3WcHS.svg)](https://asciinema.org/a/ZPrwdFfGhMC3WcHS)
+[![asciicast](https://asciinema.org/a/4U15iGeGv0FFerZT.svg)](https://asciinema.org/a/4U15iGeGv0FFerZT)
 
 ```bash
 # Fetch Apple's latest 10-K Risk Factors as clean Markdown
