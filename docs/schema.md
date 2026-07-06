@@ -15,6 +15,50 @@ identifies the extraction code (the cache keys parsed output on it).
 A missing value is always JSON `null` — never `0` or `""`. Dates are plain
 `YYYY-MM-DD` strings, not RFC3339 timestamps.
 
+## Worked example
+
+The example below shows how to read a small part of an AAPL FY2024 JSON response.
+It uses values that are already hand-verified in
+`internal/accuracy/testdata/corpus/aapl/baseline.json`.
+
+```json
+{
+  "metadata": {
+    "ticker": "AAPL",
+    "form": "10-K",
+    "schema_version": "1.0.0"
+  },
+  "statements": [
+    {
+      "title": "CONSOLIDATED STATEMENTS OF OPERATIONS",
+      "columns": [
+        { "label": "2024", "period_end": "2024-09-28" },
+        { "label": "2023", "period_end": "2023-09-30" }
+      ],
+      "rows": [
+        {
+          "label": "Net sales",
+          "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+          "type": "data",
+          "values": [391035000000, 383285000000]
+        },
+        {
+          "label": "Net income",
+          "concept": "us-gaap:NetIncomeLoss",
+          "type": "total",
+          "values": [93736000000, 96995000000]
+        }
+      ]
+    }
+  ]
+}
+```
+
+Read the row values by position: the first value belongs to the first column
+(`2024`), and the second value belongs to the second column (`2023`). Consumers
+that compare filings should prefer the stable `concept` field over the display
+`label`, because labels can vary between companies and years.
+
 ## Document
 
 The top-level object: one normalized filing.
